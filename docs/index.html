@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="dark-theme">
+<html lang="pt-BR" class="black-theme">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Viewport otimizado para mobile e desabilitar zoom -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>MLP Trainer</title>
   
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script> <!-- Versão específica para consistência -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
   <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -32,11 +33,10 @@
       <h1>MLP Trainer - Redes Neurais</h1>
       <p>Interface interativa para treinar um modelo MLP</p>
       <p>Por Gabriel Maia <a href="https://github.com/gabrielmsilva00" target="_blank" rel="noopener noreferrer">@gabrielmsilva00</a></p>
-      <p>Versão 0.0.3</p> <!-- Atualizei a versão como exemplo -->
+      <p>Versão 0.1.0</p>
       <p>© 2025</p>
     </header>
     
-    <!-- Linha 1: Configuração de Dados e Parâmetros de Treinamento (como antes) -->
     <div class="grid-row">
       <div class="card elevation-1">
         <h2 class="card-title">
@@ -114,7 +114,6 @@
       </div>
     </div>
 
-    <!-- Linha 2: Arquitetura da Rede e Controle e Gerenciamento (LADO A LADO) -->
     <div class="grid-row">
       <div class="card elevation-1">
         <h2 class="card-title">
@@ -122,7 +121,6 @@
           Arquitetura da Rede (layers)
         </h2>
         <div id="dynamic-layers-container">
-          <!-- Camadas ocultas dinâmicas aparecerão aqui -->
         </div>
         <div class="layer-actions" style="margin-top: 1rem; margin-bottom: 1rem; display: flex; gap: 1rem;">
           <button id="add-hidden-layer-btn" class="md-btn">
@@ -187,7 +185,6 @@
       </div>
     </div>
 
-    <!-- Linha 3: Status e Resultados (LADO A LADO) -->
     <div class="grid-row">
       <div class="card elevation-1">
         <h2 class="card-title">
@@ -219,7 +216,7 @@
           <button class="md-btn view-mode-btn" data-mode="all">Todos os Folds</button>
         </div>
         <div id="best-model-view">
-          <div class="charts-container"> <!-- Container para os gráficos do melhor modelo lado a lado -->
+          <div class="charts-container">
             <div id="loss-chart" class="chart"></div>
             <div id="accuracy-chart" class="chart"></div>
           </div>

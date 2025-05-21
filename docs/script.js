@@ -142,7 +142,7 @@ function getKFolds(x, y, k, testSize) {
 
         const xShuffled = x.gather(indicesTensor);
         const yShuffled = y.gather(indicesTensor);
-        
+
         const folds = [];
 
         if (k === 1) {
@@ -162,11 +162,11 @@ function getKFolds(x, y, k, testSize) {
                 const xTrainParts = [], yTrainParts = [];
                 if (i > 0) { xTrainParts.push(xShuffled.slice(0, valStart)); yTrainParts.push(yShuffled.slice(0, valStart)); }
                 if (i < k - 1) { xTrainParts.push(xShuffled.slice(valEnd)); yTrainParts.push(yShuffled.slice(valEnd)); }
-                
+
                 let xTrain, yTrain;
-                if (xTrainParts.length === 0) { // Should only happen if k=1 and val takes all data, or foldSize is too large
-                    xTrain = xShuffled.gather(tf.tensor1d([], 'int32')); // Empty tensor
-                    yTrain = yShuffled.gather(tf.tensor1d([], 'int32')); // Empty tensor
+                if (xTrainParts.length === 0) { 
+                    xTrain = xShuffled.gather(tf.tensor1d([], 'int32')); 
+                    yTrain = yShuffled.gather(tf.tensor1d([], 'int32')); 
                 } else if (xTrainParts.length === 1) {
                     xTrain = xTrainParts[0];
                     yTrain = yTrainParts[0];
@@ -214,7 +214,7 @@ function createModel(inputShape, layerDefs, optimizerName, learningRateVal) {
     }
     model.add(tf.layers.dense(layerConfig));
   });
-  
+
   let optimizerInstance;
   if (optimizerName === 'adam') optimizerInstance = tf.train.adam(learningRateVal);
   else if (optimizerName === 'sgd') optimizerInstance = tf.train.sgd(learningRateVal);
@@ -237,29 +237,28 @@ class CustomLogger extends tf.Callback {
     this.maxEpochsPerFold = maxEpochsPerFold;
     this.currentFoldNum = currentFoldNum;
     this.totalFolds = totalFolds;
-    this.getStopSignal = getStopSignal; // Função para verificar a flag de interrupção
+    this.getStopSignal = getStopSignal; 
   }
-  async onEpochEnd(epoch, logs) { // Tornar async para usar await tf.nextFrame()
+  async onEpochEnd(epoch, logs) { 
     let trainingShouldStop = false;
     if (this.getStopSignal && this.getStopSignal()) {
       log(`Sinal de interrupção recebido na Época ${epoch + 1} do ${this.foldIdentifier}. Model.stopTraining será definido como true.`);
-      if (this.model) { // this.model é definido internamente pelo TensorFlow.js
-        this.model.stopTraining = true; // Sinaliza ao TFJS para parar após esta época
+      if (this.model) { 
+        this.model.stopTraining = true; 
       }
       trainingShouldStop = true;
     }
     const overallProgress = (this.currentFoldNum + (epoch + 1) / this.maxEpochsPerFold) / this.totalFolds;
     const valLoss = logs.val_loss !== undefined ? logs.val_loss.toFixed(4) : 'N/A';
     const valAccDisplay = logs.val_acc !== undefined ? (logs.val_acc * 100).toFixed(2) + '%' : 'N/A';
-    
+
     updateProgress(overallProgress, `${this.foldIdentifier}, Época ${epoch + 1}: Perda Val: ${valLoss}, Acc Val: ${valAccDisplay}`);
-    
+
     if (epoch % 10 === 0 || epoch === this.maxEpochsPerFold - 1 || trainingShouldStop) {
       const trainAccDisplay = logs.acc !== undefined ? (logs.acc * 100).toFixed(2) + '%' : 'N/A';
       log(`Época ${epoch + 1} (${this.foldIdentifier}): Perda Treino: ${logs.loss.toFixed(4)}, Acc Treino: ${trainAccDisplay}, Perda Val: ${valLoss}, Acc Val: ${valAccDisplay}${trainingShouldStop ? ' (Interrompendo...)' : ''}`);
     }
-    
-    // Ceder controle para o navegador para atualizar a UI e processar eventos
+
     await tf.nextFrame(); 
   }
 }
@@ -267,8 +266,8 @@ class CustomLogger extends tf.Callback {
 async function trainModel() {
   if (isTraining) { log("Treinamento já está em andamento."); return; }
   isTraining = true;
-  stopTrainingFlag = false; // Resetar a flag no início de um novo treinamento
-  // Atualizar UI dos botões
+  stopTrainingFlag = false; 
+
   trainBtn.textContent = "Treinando...";
   trainBtn.disabled = true;
   document.getElementById('stop-train-btn').style.display = 'inline-block';
@@ -277,7 +276,7 @@ async function trainModel() {
   loadModelBtn.disabled = true;
   log("Iniciando processo de treinamento...");
   updateProgress(0, "Preparando dados e modelo...");
-  await tf.nextFrame(); // Permitir atualização inicial da UI
+  await tf.nextFrame(); 
   try {
     const nSamples = parseInt(nSamplesInput.value);
     const nFeatures = parseInt(nFeaturesInput.value);
@@ -312,13 +311,13 @@ async function trainModel() {
     for (let i = 0; i < folds.length; i++) {
       if (stopTrainingFlag) {
           log(`Treinamento interrompido pelo usuário antes do Fold ${i + 1}.`);
-          break; // Sair do loop de folds
+          break; 
       }
       updateProgress(i / folds.length, `Preparando Fold ${i + 1}/${folds.length}...`);
-      await tf.nextFrame(); // Ceder controle entre folds
-      
+      await tf.nextFrame(); 
+
       log(`--- Fold ${i + 1} ---`);
-      
+
       const { train, val } = folds[i];
       if (!train.x || !train.y || !val.x || !val.y || train.x.shape[0] === 0 || val.x.shape[0] === 0) {
           log(`Fold ${i+1} ignorado devido a dados de treino/validação insuficientes. Train X: ${train.x ? train.x.shape : 'null'}, Val X: ${val.x ? val.x.shape : 'null'}`);
@@ -329,8 +328,7 @@ async function trainModel() {
           log(`Falha ao criar modelo para o Fold ${i+1}.`);
           continue;
       }
-      
-      // Passar uma função getter para a flag de interrupção
+
       const customLogger = new CustomLogger(`Fold ${i + 1}`, maxEpochs, i, folds.length, () => stopTrainingFlag);
       let history;
       try {
@@ -348,20 +346,19 @@ async function trainModel() {
           log(`Erro durante model.fit() para o Fold ${i+1}: ${fitError.message}`);
           if (model) model.dispose();
           tf.dispose([train.x, train.y, val.x, val.y]);
-          continue; // Pular para o próximo fold
+          continue; 
       }
-      // Verificar se o treinamento foi interrompido durante este fold
+
       if (stopTrainingFlag && model.stopTraining) {
           log(`Fold ${i + 1} interrompido durante o treinamento.`);
       }
-      
+
       const finalValMetrics = await model.evaluate(val.x, val.y, {batchSize: batchSize});
       const valLoss = finalValMetrics[0].dataSync()[0];
       const valAcc = finalValMetrics[1].dataSync()[0];
-      tf.dispose(finalValMetrics); // Descartar tensores de evaluate
+      tf.dispose(finalValMetrics); 
       log(`Fold ${i + 1} - Validação Final: Perda = ${valLoss.toFixed(4)}, Acurácia = ${(valAcc * 100).toFixed(2)}%`);
-      
-      // Adicionar resultados apenas se o histórico existir (não interrompido antes da primeira época)
+
       if (history && history.history) {
           foldResults.push({ 
               loss: history.history.loss || [], 
@@ -371,21 +368,21 @@ async function trainModel() {
               final_val_loss: valLoss, 
               final_val_accuracy: valAcc 
           });
-      } else if (!stopTrainingFlag) { // Se não foi interrompido, mas não há histórico, é estranho
+      } else if (!stopTrainingFlag) { 
           log(`AVISO: Fold ${i+1} completou model.fit() mas não produziu histórico válido.`);
       }
-      
-      if (valAcc > bestValAccuracy && !stopTrainingFlag) { // Não atualizar o melhor modelo se o treinamento foi interrompido
+
+      if (valAcc > bestValAccuracy && !stopTrainingFlag) { 
         bestValAccuracy = valAcc;
         bestFoldIndex = i;
         if (currentBestModel) currentBestModel.dispose();
-        currentBestModel = model; // Manter este modelo
+        currentBestModel = model; 
       } else {
-        model.dispose(); // Descartar o modelo treinado neste fold
+        model.dispose(); 
       }
-      tf.dispose([train.x, train.y, val.x, val.y]); // Descartar dados do fold
-    } // Fim do loop de folds
-    
+      tf.dispose([train.x, train.y, val.x, val.y]); 
+    } 
+
     if (stopTrainingFlag) {
         log("Processo de treinamento interrompido pelo usuário.");
         updateProgress( (foldResults.length / (folds.length || 1) ), "Treinamento interrompido.");
@@ -396,8 +393,7 @@ async function trainModel() {
         log("Nenhum fold foi treinado com sucesso ou o treinamento foi interrompido muito cedo.");
         updateProgress(0, "Treinamento finalizado sem resultados de folds.");
     }
-    
-    // Plotar resultados mesmo se interrompido, com o que tiver sido coletado
+
     if (currentBestModel && bestFoldIndex !== -1 && foldResults[bestFoldIndex]) {
         log(`Melhor modelo (Fold ${bestFoldIndex + 1}) com acurácia de validação de ${(bestValAccuracy * 100).toFixed(2)}% mantido.`);
         plotBestModelResults(foldResults[bestFoldIndex]);
@@ -421,9 +417,9 @@ async function trainModel() {
     document.getElementById('stop-train-btn').disabled = true;
     saveModelBtn.disabled = !currentBestModel;
     loadModelBtn.disabled = false;
-    // stopTrainingFlag será resetado no próximo clique de 'trainBtn'
+
     log("Rotina de finalização do treinamento executada.");
-    await tf.nextFrame(); // Garantir que a UI seja atualizada após tudo
+    await tf.nextFrame(); 
   }
 }
 
@@ -433,12 +429,12 @@ function plotBestModelResults(bestFoldData) {
     log("Dados insuficientes para plotar o melhor modelo."); return; 
   }
   const epochs = Array.from({ length: bestFoldData.loss.length }, (_, i) => i + 1);
-  
+
   const lossTraceTrain = { x: epochs, y: bestFoldData.loss, mode: 'lines', name: 'Perda (Treino)', line: {color: 'blue'} };
   const lossTraceVal = { x: epochs, y: bestFoldData.val_loss, mode: 'lines', name: 'Perda (Validação)', line: {color: 'orange'} };
   const accuracyTraceTrain = { x: epochs, y: bestFoldData.accuracy.map(a => a*100), mode: 'lines', name: 'Acurácia (Treino)', line: {color: 'green'} };
   const accuracyTraceVal = { x: epochs, y: bestFoldData.val_accuracy.map(a => a*100), mode: 'lines', name: 'Acurácia (Validação)', line: {color: 'red'} };
-  
+
   const layout = getCurrentPlotlyThemeLayout();
   Plotly.newPlot(lossChart, [lossTraceTrain, lossTraceVal], { ...layout, title: 'Curvas de Perda (Melhor Fold)', yaxis: {...layout.yaxis, title: 'Perda'} , xaxis: {...layout.xaxis, title: 'Época'} });
   Plotly.newPlot(accuracyChart, [accuracyTraceTrain, accuracyTraceVal], { ...layout, title: 'Curvas de Acurácia (Melhor Fold)', yaxis: {...layout.yaxis, title: 'Acurácia (%)'} , xaxis: {...layout.xaxis, title: 'Época'} });
@@ -448,14 +444,14 @@ function plotBestModelResults(bestFoldData) {
 function plotAllFoldsResults(results) {
   if (!results || results.length === 0) { Plotly.purge(allFoldsChart); return; }
   const tracesLoss = [];
-  
+
   results.forEach((foldData, index) => {
     if (foldData && foldData.val_loss && foldData.val_loss.length > 0) {
         const epochs = Array.from({ length: foldData.val_loss.length }, (_, i) => i + 1);
         tracesLoss.push({ x: epochs, y: foldData.val_loss, mode: 'lines', name: `Fold ${index + 1} Perda Val.` });
     }
   });
-  
+
   const layout = getCurrentPlotlyThemeLayout();
   if(tracesLoss.length > 0) {
     Plotly.newPlot(allFoldsChart, tracesLoss, { ...layout, title: 'Perda de Validação (Todos Folds)', yaxis: {...layout.yaxis, title: 'Perda'} , xaxis: {...layout.xaxis, title: 'Época'} });
@@ -486,7 +482,7 @@ function displayMetrics(results) {
       }
     }
   });
-  
+
   results.forEach((fold, index) => {
     if (fold && typeof fold.final_val_loss !== 'undefined' && typeof fold.final_val_accuracy !== 'undefined') {
       const loss = fold.final_val_loss;
@@ -495,7 +491,7 @@ function displayMetrics(results) {
       metricsHTML += `<tr class="${isBest ? 'highlight' : ''}"><td>${index + 1}</td><td>${loss.toFixed(4)}</td><td>${acc.toFixed(2)}%</td></tr>`;
     }
   });
-  
+
   if (validFolds > 0) {
     const avgLoss = totalLoss / validFolds;
     const avgAcc = (totalAcc / validFolds) * 100;
@@ -600,7 +596,7 @@ async function loadTrainedModel() {
         currentBestModel = loadedModel;
         log("Modelo carregado com sucesso!");
         statusText.textContent = "Modelo carregado. Pronto para avaliação ou novo treinamento.";
-        
+
         foldResults = [];
         plotBestModelResults(null); 
         plotAllFoldsResults([]);
@@ -626,22 +622,22 @@ function init() {
     trainBtn.disabled = true; saveModelBtn.disabled = true; loadModelBtn.disabled = true;
     return;
   }
-  
+
   loadTheme();
   statusText.textContent = 'Pronto para iniciar treinamento.';
   trainBtn.addEventListener('click', trainModel);
-  
+
   const stopTrainBtn = document.getElementById('stop-train-btn');
   stopTrainBtn.addEventListener('click', () => {
     log("Solicitação de interrupção do treinamento recebida...");
     stopTrainingFlag = true;
     statusText.textContent = "Tentando interromper o treinamento...";
-    stopTrainBtn.disabled = true; // Prevenir múltiplos cliques
+    stopTrainBtn.disabled = true; 
   });
   saveModelBtn.addEventListener('click', saveTrainedModel);
   saveModelBtn.disabled = true;
   loadModelBtn.addEventListener('click', loadTrainedModel);
-  
+
   viewModeBtns.forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.mode)));
   addHiddenLayerBtn.addEventListener('click', () => addHiddenLayerUI());
   removeHiddenLayerBtn.addEventListener('click', removeHiddenLayerUI);
