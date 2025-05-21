@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark-theme">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MLP Trainer - Material Design</title>
+  
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
+  <!-- Material Design Typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- Bibliotecas -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+  
+  <!-- Estilos -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="theme-container">
+    <div class="theme-toggle">
+      <span class="material-icons light-icon">light_mode</span>
+      <span class="material-icons dark-icon">dark_mode</span>
+      <span class="material-icons black-icon">nights_stay</span>
+      <div class="theme-slider">
+        <div class="theme-options">
+          <button class="theme-option" data-theme="light">Light</button>
+          <button class="theme-option" data-theme="dark">Dark</button>
+          <button class="theme-option" data-theme="black">Black</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <header class="app-header elevation-2">
+      <h1>MLP Trainer</h1>
+      <p>Interface interativa para treinar uma rede neural MLP</p>
+    </header>
+    
+    <div class="grid">
+      <div class="card elevation-1">
+        <h2 class="card-title">
+          <span class="material-icons">settings</span>
+          Configuração
+        </h2>
+        <div class="form-group">
+          <label for="n-samples">Número de Amostras:</label>
+          <input type="number" id="n-samples" value="1000" min="100" max="10000" class="md-input">
+        </div>
+        
+        <div class="form-group">
+          <label for="n-features">Número de Features:</label>
+          <input type="number" id="n-features" value="20" min="2" max="100" class="md-input">
+        </div>
+        
+        <div class="form-group">
+          <label for="epochs">Épocas:</label>
+          <input type="number" id="epochs" value="100" min="10" max="1000" class="md-input">
+        </div>
+        
+        <div class="form-group">
+          <label for="batch-size">Tamanho do Batch:</label>
+          <input type="number" id="batch-size" value="32" min="8" max="256" class="md-input">
+        </div>
+        
+        <div class="form-group">
+          <label for="k-folds">Número de Folds:</label>
+          <input type="number" id="k-folds" value="5" min="2" max="10" class="md-input">
+        </div>
+
+        <div class="form-group">
+          <label for="learning-rate">Taxa de Aprendizado:</label>
+          <input type="number" id="learning-rate" value="0.001" min="0.0001" max="0.1" step="0.0001" class="md-input">
+        </div>
+
+        <div class="form-group">
+          <label for="dropout-rate">Taxa de Dropout:</label>
+          <input type="number" id="dropout-rate" value="0.2" min="0" max="0.5" step="0.1" class="md-input">
+        </div>
+
+        <div class="form-group">
+          <label for="hidden-layers">Camadas Ocultas (separadas por vírgula):</label>
+          <input type="text" id="hidden-layers" value="16,8" class="md-input">
+        </div>
+
+        <div class="form-group">
+          <label for="activation-func">Função de Ativação:</label>
+          <select id="activation-func" class="md-input">
+            <option value="relu">ReLU</option>
+            <option value="tanh">Tanh</option>
+            <option value="sigmoid">Sigmoid</option>
+            <option value="elu">ELU</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="optimizer">Otimizador:</label>
+          <select id="optimizer" class="md-input">
+            <option value="adam">Adam</option>
+            <option value="sgd">SGD</option>
+            <option value="rmsprop">RMSprop</option>
+            <option value="adagrad">Adagrad</option>
+          </select>
+        </div>
+        
+        <button id="train-btn" class="md-btn md-btn-primary elevation-1">
+          <span class="material-icons">play_arrow</span>
+          Executar Modelo
+        </button>
+      </div>
+      
+      <div class="card elevation-1">
+        <h2 class="card-title">
+          <span class="material-icons">info</span>
+          Status
+        </h2>
+        <div class="status-indicator">
+          <div id="status-text">Aguardando inicialização...</div>
+        </div>
+        
+        <div class="progress-container">
+          <label>Progresso do Treinamento:</label>
+          <div class="md-progress">
+            <div id="progress-bar" class="md-progress-bar" style="width: 0%"></div>
+          </div>
+          <div id="progress-text">0%</div>
+        </div>
+        
+        <div class="log-container elevation-inset">
+          <div id="log"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card elevation-1 full-width">
+      <h2 class="card-title">
+        <span class="material-icons">analytics</span>
+        Resultados
+      </h2>
+      
+      <div class="view-toggle">
+        <button class="md-btn view-mode-btn active" data-mode="best">Melhor Modelo</button>
+        <button class="md-btn view-mode-btn" data-mode="all">Todos os Folds</button>
+      </div>
+      
+      <div id="best-model-view">
+        <div class="grid">
+          <div id="loss-chart" class="chart"></div>
+          <div id="accuracy-chart" class="chart"></div>
+        </div>
+      </div>
+      
+      <div id="all-folds-view" style="display: none;">
+        <div id="all-folds-chart" class="chart"></div>
+      </div>
+      
+      <div id="metrics" class="metrics">
+        <p>Execute o modelo para ver métricas.</p>
+      </div>
+    </div>
+    
+    <footer class="app-footer">
+      <p>Desenvolvido com TensorFlow.js, Plotly e Material Design</p>
+      <div class="footer-icons">
+        <span class="material-icons">code</span>
+        <span class="material-icons">analytics</span>
+        <span class="material-icons">psychology</span>
+      </div>
+    </footer>
+  </div>
+  
+  <script src="script.js"></script>
+</body>
+</html>
