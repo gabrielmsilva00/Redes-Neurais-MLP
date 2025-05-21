@@ -793,3 +793,4 @@ window.addEventListener('resize', () => {
 });
 
 window.addEventListener('load', init);
+// TODO: Melhorar os gráficos
