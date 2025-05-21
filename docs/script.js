@@ -44,32 +44,52 @@ function getPlotlyColorsFromCSS() {
 function getCurrentPlotlyThemeLayout() {
     const colors = getPlotlyColorsFromCSS();
     return {
+
+        autosize: true, 
+
         paper_bgcolor: colors.paper_bgcolor,
         plot_bgcolor: colors.plot_bgcolor,
-        font: { color: colors.font_color },
-        titlefont: { color: colors.title_color }, 
+        font: { color: colors.font_color, size: 11 }, 
+        titlefont: { color: colors.title_color, size: 16 },
+
         xaxis: {
             gridcolor: colors.gridcolor,
             zerolinecolor: colors.zerolinecolor,
             linecolor: colors.linecolor,
-            tickfont: { color: colors.font_color },
-            titlefont: { color: colors.font_color } 
+            tickfont: { color: colors.font_color, size: 10 },
+            titlefont: { color: colors.font_color, size: 12 },
+            automargin: true, 
         },
         yaxis: {
             gridcolor: colors.gridcolor,
             zerolinecolor: colors.zerolinecolor,
             linecolor: colors.linecolor,
-            tickfont: { color: colors.font_color },
-            titlefont: { color: colors.font_color } 
-        },
-        legend: {
-          bgcolor: colors.legend_bgcolor,
-          font: { color: colors.legend_font_color },
-          bordercolor: colors.legend_bordercolor,
-          borderwidth: 1
+            tickfont: { color: colors.font_color, size: 10 },
+            titlefont: { color: colors.font_color, size: 12 },
+            automargin: true, 
         },
 
-        template: {}
+        legend: {
+          bgcolor: colors.legend_bgcolor,
+          font: { color: colors.legend_font_color, size: 10 },
+          bordercolor: colors.legend_bordercolor,
+          borderwidth: 1,
+          orientation: 'h',   
+          yanchor: 'top',     
+          y: -0.20,           
+
+          xanchor: 'center',  
+          x: 0.5              
+        },
+
+        margin: {
+            l: 60,  
+            r: 30,  
+            b: 80,  
+            t: 50,  
+            pad: 4  
+        },
+        template: {} 
     };
 }
 
@@ -491,41 +511,35 @@ async function trainModel() {
 }
 
 function plotBestModelResults(bestFoldData) {
-  const baseLayout = getCurrentPlotlyThemeLayout(); 
-  const responsiveConfig = {responsive: true};
-
+  const baseLayout = getCurrentPlotlyThemeLayout();
+  const responsiveConfig = {responsive: true}; 
   if (!bestFoldData || !bestFoldData.loss || bestFoldData.loss.length === 0 || !bestFoldData.val_loss || bestFoldData.val_loss.length === 0) {
     Plotly.purge(lossChartEl); Plotly.purge(accuracyChartEl);
     log("Dados insuficientes para plotar gráficos do melhor modelo.");
-
-    Plotly.newPlot(lossChartEl, [], { ...baseLayout, title: 'Curvas de Perda (Sem Dados)'}, responsiveConfig);
-    Plotly.newPlot(accuracyChartEl, [], { ...baseLayout, title: 'Curvas de Acurácia (Sem Dados)'}, responsiveConfig);
+    Plotly.newPlot(lossChartEl, [], { ...baseLayout, title: 'Curvas de Perda (Sem Dados)', xaxis: {...baseLayout.xaxis, title: 'Época'}, yaxis: {...baseLayout.yaxis, title: 'Perda'} }, responsiveConfig);
+    Plotly.newPlot(accuracyChartEl, [], { ...baseLayout, title: 'Curvas de Acurácia (Sem Dados)', xaxis: {...baseLayout.xaxis, title: 'Época'}, yaxis: {...baseLayout.yaxis, title: 'Acurácia (%)'} }, responsiveConfig);
     return;
   }
   const epochs = Array.from({ length: bestFoldData.loss.length }, (_, i) => i + 1);
-
-  const lossTraceTrain = { x: epochs, y: bestFoldData.loss, mode: 'lines', name: 'Perda (Treino)', line: {color: 'var(--plotly-trace-blue)'} }; 
+  const lossTraceTrain = { x: epochs, y: bestFoldData.loss, mode: 'lines', name: 'Perda (Treino)', line: {color: 'var(--plotly-trace-blue)'} };
   const lossTraceVal = { x: epochs, y: bestFoldData.val_loss, mode: 'lines', name: 'Perda (Validação)', line: {color: 'var(--plotly-trace-orange)'} };
   const accuracyTraceTrain = { x: epochs, y: bestFoldData.accuracy.map(a => a*100), mode: 'lines', name: 'Acurácia (Treino)', line: {color: 'var(--plotly-trace-green)'} };
   const accuracyTraceVal = { x: epochs, y: bestFoldData.val_accuracy.map(a => a*100), mode: 'lines', name: 'Acurácia (Validação)', line: {color: 'var(--plotly-trace-red)'} };
-
   Plotly.newPlot(lossChartEl, [lossTraceTrain, lossTraceVal], { ...baseLayout, title: 'Curvas de Perda (Melhor Fold)', yaxis: {...baseLayout.yaxis, title: 'Perda'} , xaxis: {...baseLayout.xaxis, title: 'Época'} }, responsiveConfig);
   Plotly.newPlot(accuracyChartEl, [accuracyTraceTrain, accuracyTraceVal], { ...baseLayout, title: 'Curvas de Acurácia (Melhor Fold)', yaxis: {...baseLayout.yaxis, title: 'Acurácia (%)'} , xaxis: {...baseLayout.xaxis, title: 'Época'} }, responsiveConfig);
-  switchView('best');
 }
 
 function plotAllFoldsResults(results) {
   const baseLayout = getCurrentPlotlyThemeLayout();
   const responsiveConfig = {responsive: true};
-
   if (!results || results.length === 0) {
     Plotly.purge(allFoldsChartEl);
-    Plotly.newPlot(allFoldsChartEl, [], { ...baseLayout, title: 'Perda de Validação (Todos Folds - Sem Dados)'}, responsiveConfig);
+    Plotly.newPlot(allFoldsChartEl, [], { ...baseLayout, title: 'Perda de Validação (Todos Folds - Sem Dados)', xaxis: {...baseLayout.xaxis, title: 'Época'}, yaxis: {...baseLayout.yaxis, title: 'Perda'} }, responsiveConfig);
     return;
   }
-  const tracesLoss = [];
-  const colorPalette = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'];
 
+  const tracesLoss = [];
+  const colorPalette = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']; 
   results.forEach((foldData, index) => {
     if (foldData && foldData.val_loss && foldData.val_loss.length > 0) {
         const epochs = Array.from({ length: foldData.val_loss.length }, (_, i) => i + 1);
@@ -538,12 +552,11 @@ function plotAllFoldsResults(results) {
         });
     }
   });
-
   if(tracesLoss.length > 0) {
     Plotly.newPlot(allFoldsChartEl, tracesLoss, { ...baseLayout, title: 'Perda de Validação (Todos Folds)', yaxis: {...baseLayout.yaxis, title: 'Perda'} , xaxis: {...baseLayout.xaxis, title: 'Época'} }, responsiveConfig);
   } else {
     Plotly.purge(allFoldsChartEl);
-    Plotly.newPlot(allFoldsChartEl, [], { ...baseLayout, title: 'Perda de Validação (Todos Folds - Sem Dados)'}, responsiveConfig);
+    Plotly.newPlot(allFoldsChartEl, [], { ...baseLayout, title: 'Perda de Validação (Todos Folds - Sem Dados)', xaxis: {...baseLayout.xaxis, title: 'Época'}, yaxis: {...baseLayout.yaxis, title: 'Perda'} }, responsiveConfig);
   }
 }
 
