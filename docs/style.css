@@ -20,33 +20,53 @@
   --progress-bar-fill: var(--primary-color);
   --box-shadow-1: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
   --box-shadow-2: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+
+  --plotly-paper-bg-color: #ffffff;
+  --plotly-plot-bg-color: #f8f9fa; 
+  --plotly-font-color: #333333;
+  --plotly-grid-color: #d1d1d1;
+  --plotly-line-color: var(--primary-color); 
+  --plotly-legend-bg-color: rgba(255, 255, 255, 0.85);
+  --plotly-legend-font-color: #333333;
+  --plotly-legend-border-color: #cccccc;
+  --primary-color-alpha: rgba(98, 0, 238, 0.25); 
 }
 
 html.dark-theme {
   --primary-color: #BB86FC;
-  --primary-variant-color: #3700B3; 
+  --primary-variant-color: #996ae2; 
   --secondary-color: #03DAC6;
   --background-color: #121212;
-  --surface-color: #1e1e1e; 
-  --card-bg-color: #2c2c2c; 
+  --surface-color: #1e1e1e;
+  --card-bg-color: #2c2c2c;
   --on-primary-color: #000000;
   --on-secondary-color: #000000;
-  --on-background-color: #e0e0e0; 
-  --on-surface-color: #e0e0e0;   
+  --on-background-color: #e0e0e0;
+  --on-surface-color: #e0e0e0;
   --text-color: #e0e0e0;
   --text-light-color: #b0b0b0;
-  --border-color: #424242; 
+  --border-color: #424242;
   --input-bg-color: #333333;
   --input-border-color: #555555;
   --icon-color: #bdbdbd;
   --link-color: var(--secondary-color);
-  --progress-bar-bg: #333;
+  --progress-bar-bg: #333333;
   --progress-bar-fill: var(--primary-color);
+
+  --plotly-paper-bg-color: var(--card-bg-color); 
+  --plotly-plot-bg-color: #3a3a3a; 
+  --plotly-font-color: #e0e0e0;
+  --plotly-grid-color: #5a5a5a;
+  --plotly-line-color: var(--primary-color);
+  --plotly-legend-bg-color: rgba(44, 44, 44, 0.85);
+  --plotly-legend-font-color: #e0e0e0;
+  --plotly-legend-border-color: #555555;
+  --primary-color-alpha: rgba(187, 134, 252, 0.25); 
 }
 
 html.black-theme {
   --primary-color: #BB86FC;
-  --primary-variant-color: #3700B3;
+  --primary-variant-color: #996ae2;
   --secondary-color: #03DAC6;
   --background-color: #000000;
   --surface-color: #101010;
@@ -62,8 +82,18 @@ html.black-theme {
   --input-border-color: #4a4a4a;
   --icon-color: #b0b0b0;
   --link-color: var(--secondary-color);
-  --progress-bar-bg: #222;
+  --progress-bar-bg: #222222;
   --progress-bar-fill: var(--primary-color);
+
+  --plotly-paper-bg-color: var(--card-bg-color);
+  --plotly-plot-bg-color: #272727;
+  --plotly-font-color: #dadada;
+  --plotly-grid-color: #4f4f4f;
+  --plotly-line-color: var(--primary-color);
+  --plotly-legend-bg-color: rgba(26, 26, 26, 0.85);
+  --plotly-legend-font-color: #dadada;
+  --plotly-legend-border-color: #4a4a4a;
+  --primary-color-alpha: rgba(187, 134, 252, 0.25);
 }
 
 body {
@@ -131,7 +161,7 @@ html.black-theme .theme-toggle .black-icon {
 
 .theme-toggle:hover .theme-slider,
 .theme-slider:hover {
-  max-height: 200px; 
+  max-height: 200px;
 }
 
 .theme-options {
@@ -203,7 +233,7 @@ html.black-theme .theme-option:hover {
 
 .grid-row > .card {
   flex: 1;
-  min-width: 0; 
+  min-width: 0;
 }
 
 .card {
@@ -212,7 +242,7 @@ html.black-theme .theme-option:hover {
   border-radius: 8px;
   display: flex;
   flex-direction: column;
-  color: var(--on-surface-color); 
+  color: var(--on-surface-color);
 }
 
 .card-title {
@@ -226,7 +256,7 @@ html.black-theme .theme-option:hover {
 }
 .card-title .material-icons {
   margin-right: 10px;
-  font-size: 1.5em; 
+  font-size: 1.5em;
   color: var(--primary-color);
 }
 
@@ -255,11 +285,7 @@ html.black-theme .theme-option:hover {
 .md-input:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px var(--primary-color-alpha, rgba(98, 0, 238, 0.25));
-}
-html.dark-theme .md-input:focus,
-html.black-theme .md-input:focus {
-    box-shadow: 0 0 0 2px var(--primary-color-alpha, rgba(187, 134, 252, 0.25));
+  box-shadow: 0 0 0 2px var(--primary-color-alpha);
 }
 
 .md-btn {
@@ -298,8 +324,8 @@ html.black-theme .md-btn:hover {
   background-color: var(--primary-variant-color);
 }
 
-.md-btn.md-raised, 
-.md-btn.elevation-1 { 
+.md-btn.md-raised,
+.md-btn.elevation-1 {
     box-shadow: var(--box-shadow-1);
 }
 .md-btn.md-raised:hover,
@@ -307,12 +333,12 @@ html.black-theme .md-btn:hover {
     box-shadow: var(--box-shadow-2);
 }
 
-.md-btn.md-accent { 
+.md-btn.md-accent {
     background-color: var(--secondary-color);
     color: var(--on-secondary-color);
 }
 .md-btn.md-accent:hover {
-    background-color: #02b8a2; 
+    background-color: #02b8a2;
 }
 
 .md-btn:disabled {
@@ -324,7 +350,7 @@ html.black-theme .md-btn:hover {
 
 #dynamic-layers-container .layer-card,
 #output-layer-card-container {
-  background-color: var(--surface-color); 
+  background-color: var(--surface-color);
   padding: 15px;
   border-radius: 6px;
   margin-bottom: 15px;
@@ -384,17 +410,17 @@ html.black-theme .md-btn:hover {
   border: 1px solid var(--border-color);
   border-radius: 4px;
   padding: 10px;
-  min-height: 100px; 
-  max-height: 250px; 
-  overflow-y: auto;  
-  -webkit-overflow-scrolling: touch; 
+  min-height: 100px;
+  max-height: 250px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   font-family: 'Courier New', Courier, monospace;
   font-size: 0.85em;
   color: var(--on-surface-color);
   line-height: 1.4;
   box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
 }
-.log-container div { 
+.log-container div {
     padding: 2px 0;
     border-bottom: 1px dashed var(--border-color);
 }
@@ -420,20 +446,13 @@ html.black-theme .md-btn:hover {
 }
 .charts-container .chart {
   flex: 1;
-  min-width: 280px;
-  height: 350px; 
-  background-color: var(--surface-color);
-  border-radius: 4px;
-  padding:10px;
-  border: 1px solid var(--border-color);
+  min-width: 300px; 
+  height: 400px; 
+
 }
-#all-folds-chart { 
+#all-folds-chart {
   width: 100%;
-  height: 400px;
-  background-color: var(--surface-color);
-  border-radius: 4px;
-  padding:10px;
-  border: 1px solid var(--border-color);
+  height: 450px; 
 }
 
 .metrics {
@@ -475,8 +494,8 @@ html.black-theme .md-btn:hover {
 
 @media (max-width: 900px) {
   .container {
-    padding: 10px; 
-    gap: 15px; 
+    padding: 10px;
+    gap: 15px;
   }
 
   .app-header {
@@ -490,17 +509,17 @@ html.black-theme .md-btn:hover {
   }
 
   .grid-row {
-    flex-direction: column; 
-    gap: 15px; 
+    flex-direction: column;
+    gap: 15px;
   }
 
   .grid-row > .card {
-    width: 100%; 
-    box-sizing: border-box; 
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .card {
-    padding: 15px; 
+    padding: 15px;
   }
   .card-title {
     font-size: 1.2em;
@@ -516,26 +535,25 @@ html.black-theme .md-btn:hover {
 
   .md-input, .md-btn, select.md-input {
     font-size: 16px !important; 
-    padding-top: 12px; 
+    padding-top: 12px;
     padding-bottom: 12px;
   }
-
   select.md-input {
-    height: auto; 
+    height: auto;
   }
 
   .md-btn {
-    width: 100%; 
-    margin-bottom: 10px; 
+    width: 100%;
+    margin-bottom: 10px;
   }
   .layer-actions {
-    flex-direction: column; 
+    flex-direction: column;
   }
   .layer-actions .md-btn {
     width: 100%;
   }
 
-  .card > div[style*="display: flex"] { 
+  .card > div[style*="display: flex"] {
     flex-direction: column;
   }
   .card > div[style*="display: flex"] > .md-btn {
@@ -547,13 +565,14 @@ html.black-theme .md-btn:hover {
   }
 
   .charts-container {
-    flex-direction: column; 
+    flex-direction: column;
   }
 
   .charts-container .chart,
   #all-folds-chart {
     width: 100%;
-    height: 300px;
+    min-width: unset; 
+    height: 350px; 
     box-sizing: border-box;
   }
 
@@ -580,10 +599,11 @@ html.black-theme .md-btn:hover {
   .card-title .material-icons {
     font-size: 1.2em;
   }
-  .md-input, .md-btn, select.md-input {
-    font-size: 16px !important;
-  }
   .log-container {
     font-size: 0.75em;
+  }
+  .charts-container .chart,
+  #all-folds-chart {
+    height: 320px; 
   }
 }
