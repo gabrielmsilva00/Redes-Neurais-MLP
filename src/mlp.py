@@ -140,8 +140,8 @@ class HyperParams:
     epochs:         int     = 1024
     patience:       int     = 64
     watch_for:      BestBy  = BestBy.FALSE_NEGATIVE
-    min_delta:      float   = 1e-9
-    learning_rate:  float   = 1e-3
+    min_delta:      float   = 3e-6
+    learning_rate:  float   = 6e-3
     
     layers: tuple[tuple[Activation,int],...] = (
         (Activation.TANH,8),
@@ -274,7 +274,7 @@ def _architecture_string(n_features:int)->str:
     return (
         f"Dataset:{get_dataset_name()}\n\n"
         f"Features:\t{n_features}\n\n"
-        f"[Architecture]\n\nMax Epochs:\t\t{hp.epochs}\n"
+        f"Max Epochs:\t\t{hp.epochs}\n"
         f"Best By ({hp.watch_for.value[1]}):\t{hp.watch_for.name}\n"
         f"Patience:\t\t{hp.patience}\n"
         f"Learning Rate:\t{hp.learning_rate}\n"
@@ -305,7 +305,7 @@ class FoldViewer:
         plt.show()
 
     def _make_figure(self):
-        self.fig=plt.figure(figsize=(10,6),dpi=100)
+        self.fig=plt.figure(figsize=(12,8),dpi=100)
         gs_main=self.fig.add_gridspec(1,2,width_ratios=[4,1],wspace=0.05)
 
         gs_left=mgs.GridSpecFromSubplotSpec(
