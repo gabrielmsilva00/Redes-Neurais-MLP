@@ -267,11 +267,11 @@ def get_dataset_name()->str:
     csv_files=list(cfg.csv_dir.glob("*.csv"))
     if not csv_files: return "Treinamento"
     names=[f.stem for f in csv_files if f.is_file()]
-    return ", ".join(names) if len(names)>1 else names[0] if names else "Treinamento"
+    return "\n".join(names) if len(names)>1 else names[0] if names else "Treinamento"
 
 def _architecture_string(n_features:int)->str:
     return (
-        f"Dataset:\t{get_dataset_name()}\n\n"
+        f"Dataset:{get_dataset_name()}\n\n"
         f"Features:\t{n_features}\n\n"
         f"[Architecture]\n\nMax Epochs:\t\t{hp.epochs}\n"
         f"Best By:\t\t{hp.watch_for.name} ({hp.watch_for.value[1]})\n"
