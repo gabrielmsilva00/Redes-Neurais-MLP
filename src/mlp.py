@@ -552,7 +552,7 @@ def train(csv_paths:Optional[Sequence[str]])->Path:
 
     mean_f1=np.nanmean(hist["F1_SCORE"][1:]); print(f"F1 médio (k-folds): {mean_f1:.3f}")
     scores,best_idx=fold_scores(hist); logging.info("Fold scores: %s; best=%d",scores,best_idx); print(f"Melhor fold: {best_idx+1}")
-    pprint(f"Métricas do modelo completo: {k:v for k,v in metrics_full.items() if not np.isnan(v)}")
+    pprint(f"Métricas do modelo completo: {metrics_full}")
     pprint(f"Matriz de confusão do modelo completo:\n{cm_full}")
 
     arch=_architecture_string(X.shape[1])
