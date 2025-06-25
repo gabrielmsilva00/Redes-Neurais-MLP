@@ -1,9 +1,12 @@
 """
 mlp.py
 =======
+Autoria:    Gabriel Maia, em https://github.com/gabrielmsilva00
+Repo:       https://github.com/gabrielmsilva00/Redes-Neurais-MLP
 
 Treina, avalida e inspeciona visualmente um classificador *Multilayer-Perceptron*
-(Mini-Batch SGD) a partir de conjuntos CSV binários.  
+a partir de conjuntos CSV binários.  
+
 O script pode ser usado tanto via linha de comando quanto de forma interativa,
 exibindo um painel gráfico com métricas e matrizes de confusão para cada *fold*.
 
@@ -549,8 +552,8 @@ def train(csv_paths:Optional[Sequence[str]])->Path:
 
     mean_f1=np.nanmean(hist["F1_SCORE"][1:]); print(f"F1 médio (k-folds): {mean_f1:.3f}")
     scores,best_idx=fold_scores(hist); logging.info("Fold scores: %s; best=%d",scores,best_idx); print(f"Melhor fold: {best_idx+1}")
-    pprint("Métricas do modelo completo:",{k:v for k,v in metrics_full.items() if not np.isnan(v)})
-    print("Matriz de confusão do modelo completo:\n",cm_full)
+    pprint(f"Métricas do modelo completo: {k:v for k,v in metrics_full.items() if not np.isnan(v)}")
+    pprint(f"Matriz de confusão do modelo completo:\n{cm_full}")
 
     arch=_architecture_string(X.shape[1])
     FoldViewer(cms,hist,hp.watch_for.name,hp.watch_for.value[1],arch,
