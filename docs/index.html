@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Relatório de Treinamento MLP – Diabetes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      /* Paleta Dark AMOLED */
+      --color-primary: #BB86FC;
+      --color-secondary: #03DAC6;
+      --color-background: #000000;
+      --color-surface: #121212;
+      --color-on-surface: #E0E0E0;
+      --font-family: 'Roboto', sans-serif;
+      --elevation: 0 1px 3px rgba(0,0,0,0.9), 0 1px 2px rgba(0,0,0,0.9);
+      --spacing-unit: 16px;
+    }
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: var(--color-background);
+      color: var(--color-on-surface);
+      font-family: var(--font-family);
+      line-height: 1.6;
+      padding-top: calc(var(--spacing-unit) * 5);
+    }
+    nav {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      background-color: var(--color-surface);
+      box-shadow: var(--elevation);
+      z-index: 100;
+    }
+    nav .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      padding: var(--spacing-unit);
+    }
+    nav .logo {
+      font-weight: 500;
+      font-size: 1.25rem;
+      color: var(--color-primary);
+      margin-right: auto;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: calc(var(--spacing-unit) * 1.5);
+    }
+    nav a {
+      text-decoration: none;
+      color: var(--color-on-surface);
+      font-weight: 500;
+      transition: color 0.2s;
+      cursor: pointer;
+    }
+    nav a:hover {
+      color: var(--color-primary);
+    }
+    #main-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--spacing-unit);
+    }
+    section {
+      margin-bottom: calc(var(--spacing-unit) * 4);
+    }
+    section h2 {
+      font-size: 1.75rem;
+      margin-bottom: var(--spacing-unit);
+      color: var(--color-secondary);
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--spacing-unit);
+    }
+    .card {
+      background-color: var(--color-surface);
+      padding: var(--spacing-unit);
+      border-radius: 8px;
+      box-shadow: var(--elevation);
+    }
+    .card h3 {
+      font-size: 1.125rem;
+      margin-bottom: calc(var(--spacing-unit) / 2);
+      color: var(--color-primary);
+    }
+    .text-container {
+      min-height: 100px;
+      background-color: var(--color-background);
+      border-radius: 4px;
+      padding: var(--spacing-unit);
+      color: var(--color-on-surface);
+    }
+    .chart-container,
+    .image-container,
+    .table-container {
+      min-height: 200px;
+      background-color: var(--color-surface);
+      border-radius: 8px;
+      box-shadow: var(--elevation);
+      margin-top: var(--spacing-unit);
+    }
+    @media (max-width: 600px) {
+      nav .container {
+        flex-direction: column;
+        gap: var(--spacing-unit);
+      }
+      body {
+        padding-top: calc(var(--spacing-unit) * 7);
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="container">
+      <div class="logo">MLP Diabetes</div>
+      <ul>
+        <li><a href="#" data-template="overview-template">Visão Geral</a></li>
+        <li><a href="#" data-template="data-template">Dados</a></li>
+        <li><a href="#" data-template="configuration-template">Configuração</a></li>
+        <li><a href="#" data-template="results-template">Resultados</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div id="main-content"></div>
+
+  <!-- Templates integrados -->
+  <template id="overview-template">
+    <section id="overview">
+      <h2>Visão Geral</h2>
+      <div class="card-grid">
+        <div class="card">
+          <h3>Descrição Geral</h3>
+          <div class="text-container"><!-- placeholder para texto -->
+            <div class="image-container">
+              <img src="./content/cmatrix.png" alt="Matriz de Confusão" style="width: 100%; height: auto; border-radius: 4px;">
+            </div>
+            <h4>Modelo MLP para Diagnóstico de Diabetes</h4>
+            <p>Este relatório apresenta os resultados do treinamento de uma Rede Neural Perceptron Multicamadas (MLP) para prever a presença de diabetes em pacientes. O modelo foi treinado com um conjunto de dados contendo informações médicas relevantes, visando auxiliar no diagnóstico precoce da doença.</p>
+            <br>
+            <p>A MLP é uma arquitetura de rede neural que consiste em múltiplas camadas de neurônios, permitindo a modelagem de relações complexas entre as variáveis de entrada e a saída desejada. O treinamento foi realizado utilizando técnicas avançadas de otimização e regularização para garantir um bom desempenho do modelo.</p>
+            <br>
+            <p>Os resultados obtidos demonstram a eficácia do modelo na classificação de pacientes com diabetes, apresentando métricas de desempenho como acurácia, precisão e recall. Além disso, foram geradas curvas de treinamento para monitorar o processo de aprendizado e evitar overfitting.</p>
+            <br>
+            <p>Este relatório inclui detalhes sobre a configuração do modelo, os dados utilizados, as estatísticas descritivas, as curvas de treinamento e as métricas de desempenho. O objetivo é fornecer uma visão abrangente do processo de desenvolvimento e avaliação do modelo MLP para diagnóstico de diabetes.</p>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Objetivos</h3>
+          <div class="text-container"><!-- placeholder para texto --></div>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <template id="data-template">
+    <section id="data">
+      <h2>Dados</h2>
+      <div class="card-grid">
+        <div class="card">
+          <h3>Descrição dos Dados</h3>
+          <div class="text-container"><!-- placeholder para texto --></div>
+        </div>
+        <div class="card">
+          <h3>Estatísticas</h3>
+          <div id="table-data-stats" class="table-container"><!-- placeholder para tabela --></div>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <template id="configuration-template">
+    <section id="configuration">
+      <h2>Configuração</h2>
+      <div class="card-grid">
+        <div class="card">
+          <h3>Arquitetura da Rede</h3>
+          <div class="text-container"><!-- placeholder para texto/diagrama --></div>
+        </div>
+        <div class="card">
+          <h3>Hiperparâmetros</h3>
+          <div class="text-container"><!-- placeholder para texto/lista --></div>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <template id="results-template">
+    <section id="results">
+      <h2>Resultados</h2>
+      <div class="card-grid">
+        <div class="card">
+          <h3>Curvas de Treinamento</h3>
+          <div id="chart-training-loss" class="chart-container"><!-- placeholder para gráfico de loss --></div>
+          <div id="chart-training-accuracy" class="chart-container"><!-- placeholder para gráfico de accuracy --></div>
+        </div>
+        <div class="card">
+          <h3>Matriz de Confusão</h3>
+          <div id="image-confusion-matrix" class="image-container"><!-- placeholder para imagem --></div>
+        </div>
+        <div class="card">
+          <h3>Métricas de Desempenho</h3>
+          <div id="table-metrics" class="table-container"><!-- placeholder para métricas --></div>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <script>
+    // Carrega a seção a partir do template
+    function loadSection(templateId) {
+      const tpl = document.getElementById(templateId);
+      const clone = tpl.content.cloneNode(true);
+      const target = document.getElementById('main-content');
+      target.innerHTML = '';
+      target.appendChild(clone);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Exibe Visão Geral por padrão
+      loadSection('overview-template');
+
+      // Vincula cliques do menu
+      document.querySelectorAll('nav a[data-template]').forEach(link => {
+        link.addEventListener('click', e => {
+          e.preventDefault();
+          const tplId = link.getAttribute('data-template');
+          loadSection(tplId);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
