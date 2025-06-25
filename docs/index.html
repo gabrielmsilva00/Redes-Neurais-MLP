@@ -150,9 +150,7 @@
             <br>
             <p>Este relatório apresenta os resultados do treinamento de uma Rede Neural Perceptron Multicamadas (MLP) para prever a presença de diabetes em pacientes. O modelo foi treinado com um conjunto de dados contendo informações médicas relevantes, visando auxiliar no diagnóstico precoce da doença.</p>
             <br>
-            <p>A MLP é uma arquitetura de rede neural que consiste em múltiplas camadas de neurônios, permitindo a modelagem de relações complexas entre as variáveis de entrada e a saída desejada. O treinamento foi realizado utilizando técnicas avançadas de otimização e regularização para garantir um bom desempenho do modelo.</p>
-            <br>
-            <p>Os resultados obtidos demonstram a eficácia do modelo na classificação de pacientes com diabetes, apresentando métricas de desempenho como acurácia, precisão e recall. Além disso, foram geradas curvas de treinamento para monitorar o processo de aprendizado e evitar overfitting.</p>
+            <p>A MLP é uma arquitetura de rede neural que consiste em múltiplas camadas de neurônios, permitindo a modelagem de relações complexas entre as variáveis de entrada e a saída desejada. O treinamento foi realizado utilizando variadas técnicas em conjunto, bem como algumas implementações únicas.</p>
             <br>
             <p>Este relatório inclui detalhes sobre a configuração do modelo, os dados utilizados, as estatísticas descritivas, as curvas de treinamento e as métricas de desempenho. O objetivo é fornecer uma visão abrangente do processo de desenvolvimento e avaliação do modelo MLP para diagnóstico de diabetes.</p>
           </div>
@@ -161,12 +159,14 @@
           <h3>Objetivos</h3>
           <div class="text-container">
             <ul>
-              <li>Desenvolver um modelo MLP utilizando Scikit-learn (Python) para prever a presença de diabetes.</li>
+              <li>Desenvolver um ferramenta robusta capaz de treinar modelos MLP utilizando Scikit-learn (Python) para classificação binária.</li>
               <li>Minimizar Falsos Negativos sem comprometer a Precisão.</li>
               <li>Avaliar e validar o desempenho do modelo treinado contra múltiplas instâncias da base de dados.</li>
+              <li>Gerar relatórios detalhados com estatísticas, curvas de treinamento e matriz de confusão.</li>
             </ul>
             <div class="image-container">
               <img src="./content/cmatrix.png" alt="Matriz de Confusão" style="width: 100%; height: auto; border-radius: 4px;">
+              <small>Figura 1: Matriz de Confusão do Modelo MLP</small>
             </div>
           </div>
         </div>
@@ -176,15 +176,14 @@
 
   <template id="data-template">
     <section id="data">
-      <h2>Dados</h2>
+      <h2>Resultados</h2>
       <div class="card-grid">
         <div class="card">
-          <h3>Descrição dos Dados</h3>
-          <div class="text-container"><!-- placeholder para texto --></div>
-        </div>
-        <div class="card">
           <h3>Estatísticas</h3>
-          <div id="table-data-stats" class="table-container"><!-- placeholder para tabela --></div>
+          <div class="image-container">
+            <img src="./content/low_fn.png" alt="Estatísticas dos Dados" style="width: 80%; height: auto; border-radius: 4px;">
+            <small>Figura 2: Estatísticas Descritivas dos Dados</small>
+          </div>
         </div>
       </div>
     </section>

@@ -534,7 +534,7 @@ def train(csv_paths:Optional[Sequence[str]])->Path:
     if cfg.normalize: steps.append(("scaler",StandardScaler()))
     steps.append(("mlp",MLPClassifier(hidden_layer_sizes=tuple(u for _,u in hp.layers if u>1),
         activation=hp.layers[0][0].value,solver="adam",
-        learning_rate_init=hp.learning_rate,max_iter=hp.epochs,early_stopping=True)))
+        learning_rate_init=hp.learning_rate,max_iter=hp.epochs)))
     pipe_full=Pipeline(steps); pipe_full.fit(X,y)
     pred_full,prob_full=pipe_full.predict(X),pipe_full.predict_proba(X)
     cm_full=confusion_matrix(y,pred_full)
