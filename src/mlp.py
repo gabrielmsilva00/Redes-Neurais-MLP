@@ -141,7 +141,7 @@ class HyperParams:
     watch_for:      BestBy  = BestBy.PRECISION
     min_delta:      float   = 4e-6
     batch_size:     int     = 32
-    learning_rate:  float   = 5e-4
+    learning_rate:  float   = 6e-4
     
     layers: tuple[tuple[Activation,int],...] = (
         (Activation.TANH,7),
@@ -267,7 +267,7 @@ def get_dataset_name()->str:
     csv_files=list(cfg.csv_dir.glob("*.csv"))
     if not csv_files: return "Treinamento"
     names=[f.stem for f in csv_files if f.is_file()]
-    return "\n".join(names) if len(names)>1 else names[0] if names else "Treinamento"
+    return "\n\t"+"\n\t".join(names) if len(names)>1 else names[0] if names else "Treinamento"
 
 def _architecture_string(n_features:int)->str:
     return (
@@ -437,7 +437,7 @@ class FoldViewer:
         self._create_fold_buttons(); self._draw()
 
     def save_current(self,_):
-        out=cfg.img_dir/f"{self.dataset_name.replace('.csv','')}_fold{self.idx}.png"
+        out=cfg.img_dir/f"{self.dataset_name.replace('.csv','')}_{"Modelo_Completo" if self.idx==0 else f"Fold_{self.idx}"}_{strftime('%Y%m%d_%H%M%S')}.png"
         try:
             self.fig.savefig(out,dpi=100,bbox_inches="tight")
             print("Figura salva em",out); logging.info("Figura %s salva",out.name)
