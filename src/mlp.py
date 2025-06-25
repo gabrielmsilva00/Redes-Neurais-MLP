@@ -1,17 +1,79 @@
-"""mlp.py – treinamento, validação e inspeção visual de Multilayer-Perceptron
-interativo a partir de arquivos CSV.
+"""
+mlp.py
+=======
 
-Melhorias desta versão
-──────────────────────
-• Painel-mestre com duas colunas: à esquerda uma grade 2×2
-  (Menu | Confusão / Arquitetura | Métricas) e à direita o painel de folds
-• Navegação de folds por botões ↑/↓; a roda do mouse não altera mais os folds
-• Scrollbar lateral permanece para indicar posição/vista de folds
-• Manutenção de todas as funcionalidades de treino, salvamento e recálculo
+Treina, avalida e inspeciona visualmente um classificador *Multilayer-Perceptron*
+(Mini-Batch SGD) a partir de conjuntos CSV binários.  
+O script pode ser usado tanto via linha de comando quanto de forma interativa,
+exibindo um painel gráfico com métricas e matrizes de confusão para cada *fold*.
+
+FUNCIONALIDADES PRINCIPAIS
+--------------------------
+• Treinamento k-fold estratificado com parada antecipada por métrica.  
+• Cálculo e registro de 11 métricas (F1, loss, precisão, recall, etc.).  
+• Seleção automática do melhor *fold* e visualização em um painel 2×2
+  (menu, matriz de confusão, descrição da arquitetura e métricas).  
+• Navegação pelos *folds* através de botões, *scrollbar* e salvar a figura
+  atual (.png).  
+• Re-cálculo instantâneo das métricas quando um novo CSV é carregado.  
+• Validação offline de modelos já treinados, com geração da matriz de
+  confusão correspondente.  
+• Log completo de sessão, salvamento automático de figuras e *joblib* do
+  modelo completo.
+
+USO RÁPIDO NA CLI
+-----------------
+Treinar um novo modelo com todos os CSV em `.data/` (ou mover do diretório
+atual caso não existam arquivos lá):
+
+    python mlp.py
+
+Treinar usando arquivos específicos:
+
+    python mlp.py --csv base1.csv base2.csv
+
+Validar o modelo mais recente:
+
+    python mlp.py --validate
+
+Validar um modelo indicado:
+
+    python mlp.py --validate .models/mlp_20250101_120000.joblib --csv teste.csv
+
+PASTAS PADRÃO
+-------------
+.data   CSV de entrada  
+.img    Imagens geradas (confusão e painéis)  
+.models Modelos salvos (`joblib`)  
+.log    Arquivos de log
+
+PARÂMETROS AJUSTÁVEIS
+---------------------
+Config (dados) e HyperParams (rede) estão definidos como *dataclasses*  
+e podem ser alterados antes da execução:
+
+    cfg.csv_sep           Separador de coluna (padrão ';')
+    cfg.exclude_cols      Colunas a ignorar
+    cfg.fill_strategy     Estratégia de imputação (mean, median, mode, etc.)
+    cfg.normalize         Aplica `StandardScaler`
+    
+    hp.k_folds            Nº de *folds* de validação cruzada
+    hp.epochs             Épocas máximas por *fold*
+    hp.patience           Tolerância sem melhora para *early-stopping*
+    hp.watch_for          Métrica monitorada (F1, loss, etc.)
+    hp.layers             Lista de tuplas (ativação, unidades) incluindo
+                          a saída (unidade = 1)
+
+DEPENDÊNCIAS
+------------
+Python ≥3.10, scikit-learn ≥1.3, pandas, numpy, matplotlib, joblib.
+
+Execute `python mlp.py -h` para ajuda nas flags da CLI.
 """
 
 from __future__ import annotations
 import sys, copy, logging, platform, shutil, warnings, traceback
+from pprint             import pprint
 from enum               import Enum
 from pathlib            import Path
 from argparse           import ArgumentParser, Namespace
@@ -41,18 +103,18 @@ from sklearn.preprocessing   import StandardScaler
 # ─────────────────────────────────────────────────────────────────────────────
 # ENUMS & CONFIG
 # ─────────────────────────────────────────────────────────────────────────────
-class BestBy(str, Enum):
-    VAL_LOSS        = "min"
-    FALSE_NEGATIVE  = "min"
-    FALSE_POSITIVE  = "min"
-    TRUE_POSITIVE   = "max"
-    TRUE_NEGATIVE   = "max"
-    DIFF_POSITIVE   = "max"
-    DIFF_NEGATIVE   = "max"
-    F1_SCORE        = "max"
-    ACCURACY        = "max"
-    PRECISION       = "max"
-    RECALL          = "max"
+class BestBy(Enum):
+    VAL_LOSS        = (0, "min")
+    FALSE_NEGATIVE  = (1, "min")
+    FALSE_POSITIVE  = (2, "min")
+    TRUE_POSITIVE   = (3, "max")
+    TRUE_NEGATIVE   = (4, "max")
+    DIFF_POSITIVE   = (5, "max")
+    DIFF_NEGATIVE   = (6, "max")
+    F1_SCORE        = (7, "max")
+    ACCURACY        = (8, "max")
+    PRECISION       = (9, "max")
+    RECALL          = (10, "max")
 
 class FillStrategy(Enum):
     MEAN=1; MEDIAN=2; MODE=3; ITER=4; KEEP=5; ZERO=6
@@ -66,19 +128,33 @@ class Activation(str, Enum):
 
 @dataclass(frozen=True, slots=True)
 class HyperParams:
-    k_folds:int=12; epochs:int=64; patience:int=12; min_delta:float=1e-4
-    watch_for:BestBy=BestBy.F1_SCORE; batch_size:int=64; learning_rate:float=1e-3
-    layers:tuple[tuple[Activation,int],...]=(
-        (Activation.TANH,7),(Activation.TANH,7),(Activation.SIGMOID,1))
+    k_folds:        int     = 12
+    epochs:         int     = 256
+    patience:       int     = 32
+    watch_for:      BestBy  = BestBy.PRECISION
+    min_delta:      float   = 4e-6
+    batch_size:     int     = 32
+    learning_rate:  float   = 8e-4
+    
+    layers: tuple[tuple[Activation,int],...] = (
+        (Activation.TANH,7),
+        (Activation.TANH,7),
+        (Activation.SIGMOID,2),
+        (Activation.SIGMOID,1)
+    )
 
 @dataclass(frozen=True, slots=True)
 class Config:
-    csv_sep:str=";"; target_cols:tuple[int,...]=(-1,); scramble_rows:bool=True
-    normalize:bool=True; null_value:Optional[float]=0
-    fill_strategy:FillStrategy=FillStrategy.KEEP
-    exclude_cols:tuple[int,...]=(0,)
-    csv_dir:Path=Path(".data"); img_dir:Path=Path(".img")
-    mdl_dir:Path=Path(".models"); log_dir:Path=Path(".log")
+    csv_dir:       Path = Path(".data")
+    log_dir:       Path = Path(".log")
+    img_dir:       Path = Path(".img")
+    mdl_dir:       Path = Path(".models")
+    csv_sep:        str     = ";"
+    scramble_rows:  bool    = True
+    normalize:      bool    = True
+    null_value:     Optional[float] = 0
+    fill_strategy:  FillStrategy = FillStrategy.KEEP
+    exclude_cols:   tuple[int,...] = (0,)
 
 cfg, hp = Config(), HyperParams()
 for d in (cfg.csv_dir,cfg.img_dir,cfg.mdl_dir,cfg.log_dir): d.mkdir(exist_ok=True)
@@ -124,12 +200,12 @@ def load_data(csv_paths:Optional[Sequence[Path]]=None)->tuple[pd.DataFrame,np.nd
     data=data.apply(pd.to_numeric,errors="coerce")
 
     total_cols=data.shape[1]
-    _validate_indices(cfg.target_cols,total_cols,"Target")
+    _validate_indices((-1,),total_cols,"Target")
     _validate_indices(cfg.exclude_cols,total_cols,"exclude_cols")
 
-    y=data.iloc[:,list(cfg.target_cols)].values.ravel()
+    y=data.iloc[:,list((-1,))].values.ravel()
     predictors=data.copy()
-    drop=set(cfg.exclude_cols)|set(cfg.target_cols)
+    drop=set(cfg.exclude_cols)|set((-1,))
     pred_cols=predictors.columns.difference(predictors.columns[list(drop)])
 
     if cfg.null_value is not None:
@@ -165,7 +241,7 @@ def _metric_value(name:BestBy,y_true,y_pred,prob=None)->float:
     tn,fp,fn,tp=cm.ravel(); s=tn+fp+fn+tp
     match name:
         case BestBy.F1_SCORE:        return f1_score(y_true,y_pred)
-        case BestBy.VAL_LOSS if prob is not None: return log_loss(y_true,prob)
+        case BestBy.VAL_LOSS:        return log_loss(y_true,prob)
         case BestBy.RECALL:          return recall_score(y_true,y_pred)
         case BestBy.PRECISION:       return precision_score(y_true,y_pred)
         case BestBy.TRUE_NEGATIVE:   return tn/s if s else 0
@@ -187,22 +263,24 @@ def _plot_confusion_matrix(cm:np.ndarray,ax:plt.Axes)->None:
             ax.text(j,i,int(cm[i,j]),ha="center",va="center",fontsize=24)
     ax.set_xticks([0,1]),ax.set_yticks([0,1])
     ax.set_xticklabels(["Pred 0","Pred 1"]); ax.set_yticklabels(["Real 0","Real 1"])
-    ax.set_xlabel(""),ax.set_ylabel(""); ax.set_title("Matriz de Confusão")
+    ax.set_xlabel(""),ax.set_ylabel("")
 
 def _architecture_string(n_features:int)->str:
-    layers_desc="\n\t"+"\n\t".join(f"{u} {a.value}" for a,u in hp.layers)
-    info=(f"Input:\t{n_features} features\n\n"
-          f"Architecture:{layers_desc}\n\n"
-          f"Max Epochs:\t\t{hp.epochs}\n"
-          f"Batch:\t\t\t{hp.batch_size}\n"
-          f"Learning Rate:\t{hp.learning_rate}")
-    return info.expandtabs(4)
+    return (
+        f"Features:\t{n_features}\n\n"
+        f"[Architecture]\n\nMax Epochs:\t{hp.epochs}\n"
+        f"Learning Rate:\t{hp.learning_rate}\n"
+        f"Batch Size:\t{hp.batch_size}\n"
+        f"Patience:\t{hp.patience}\n"
+        f"Best By:\t{hp.watch_for.name} ({hp.watch_for.value[1]})\n"
+        f"Min. Delta:\t{hp.min_delta}\n"
+        f"Layers:{"\n\t"+"\n\t".join(f"{u} {a.value}" for a,u in hp.layers)}"
+    ).expandtabs(4)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # VISUALIZAÇÃO INTERATIVA
 # ─────────────────────────────────────────────────────────────────────────────
 class FoldViewer:
-    """Interface gráfica para inspeção de folds (modelo completo + k folds)."""
     def __init__(
         self,cms:list[np.ndarray],hist:dict[str,list[float]],
         metric:str,direction:str,arch:str,dataset:str,
@@ -213,17 +291,16 @@ class FoldViewer:
         self.dir=direction; self.arch=arch; self.dataset_name=dataset
         self.models=models; self.val_indices=val_indices
         self.X_base,self.y_base=X,y; self.X,self.y=X,y
-        self.n=len(cms); self.idx=init_idx; self.saved=False
-        self.scroll=0                      # primeiro índice visível
-        self.max_visible=10                 # nº de botões exibidos simultaneamente
+        self.n=len(cms); self.idx=0; self.saved=False
+        self.scroll=0
+        self.max_visible=10
 
         self._make_figure(); self._draw()
         self.fig.canvas.mpl_connect("close_event",self._on_close)
         plt.show()
 
-    # ── construção da figura ───────────────────────────────────────────────
     def _make_figure(self):
-        self.fig=plt.figure(figsize=(12,8),dpi=120)
+        self.fig=plt.figure(figsize=(10,6),dpi=100)
         gs_main=self.fig.add_gridspec(1,2,width_ratios=[4,1],wspace=0.05)
 
         gs_left=mgs.GridSpecFromSubplotSpec(
@@ -238,7 +315,6 @@ class FoldViewer:
 
         self.fig.subplots_adjust(top=0.92,bottom=0.06)
 
-        # botões de menu CSV
         self.menu_btns=[]
         menu_items=[("Carregar CSV",self.load_new_csv),
                     ("Restaurar CSV",self.restore_csv),
@@ -251,24 +327,19 @@ class FoldViewer:
             btn=Button(ax,lbl); btn.on_clicked(cb)
             self.menu_btns.append(btn)
 
-        # texto da arquitetura
-        self.ax_arch.text(0.20,0.95,self.arch,va="top",ha="left",fontsize=16,wrap=True)
-
-        # inicializa botões de folds
+        self.ax_arch.text(0.20,1.40,self.arch,va="top",ha="left", wrap=True)
         self._create_fold_buttons()
 
     def _blank(self,ax):
         ax.axis("off")
         for s in ax.spines.values(): s.set_visible(False)
 
-    # converte (relativos ao painel) em coordenadas figura
     def _rel(self,ax:plt.Axes,x:float,y:float,w:float,h:float):
         bb=ax.get_position()
         return [bb.x0+x*bb.width, bb.y0+y*bb.height, w*bb.width, h*bb.height]
 
     # ── lista de folds ─────────────────────────────────────────────────────
     def _create_fold_buttons(self):
-        # destrói botões/scroll anteriores
         for btn in getattr(self,"fold_btn_objs",[]): btn.ax.remove()
         self.fold_btn_objs=[]
         if hasattr(self,"_scroll_patch"): self._scroll_patch.remove()
@@ -285,7 +356,7 @@ class FoldViewer:
         area_h=0.92-2*(btn_h+gap)          # espaço entre ↑ e ↓
         slot_h=area_h/self.max_visible
         for row,i in enumerate(vis):
-            y=0.92 - (btn_h+gap) - (row+1)*slot_h + slot_h*0.2
+            y= 0.96 - (btn_h+gap) - (row+1)*slot_h + slot_h*0.2
             label="Total" if i==0 else f"Fold {i}"
             ax=self.fig.add_axes(self._rel(self.ax_flds,0.05,y,0.9,slot_h*0.7))
             btn=Button(ax,label); btn.on_clicked(self._make_select_cb(i))
@@ -326,7 +397,6 @@ class FoldViewer:
             btn.ax.set_facecolor("lightblue" if i==self.idx else "lightgrey")
         self.fig.canvas.draw_idle()
 
-    # ── recomputar métricas ao trocar CSV ──────────────────────────────────
     def _recompute_metrics(self):
         try:
             for i,model in enumerate(self.models):
@@ -348,7 +418,6 @@ class FoldViewer:
                 self.hist["ACCURACY"][i]=(tp+tn)/s
         except Exception as exc: logging.exception("Recompute metrics failed: %s",exc)
 
-    # ── callbacks menu ─────────────────────────────────────────────────────
     def load_new_csv(self,_):
         import tkinter as tk; from tkinter import filedialog
         root=tk.Tk(); root.withdraw()
@@ -367,7 +436,7 @@ class FoldViewer:
     def save_current(self,_):
         out=cfg.img_dir/f"{self.dataset_name.replace('.csv','')}_fold{self.idx}.png"
         try:
-            self.fig.savefig(out,dpi=120,bbox_inches="tight")
+            self.fig.savefig(out,dpi=100,bbox_inches="tight")
             print("Figura salva em",out); logging.info("Figura %s salva",out.name)
             self.saved=True
         except Exception as exc: print(f"Falha ao salvar figura: {exc}")
@@ -379,19 +448,19 @@ class FoldViewer:
         f1=self.hist["F1_SCORE"][self.idx]; prec=self.hist["PRECISION"][self.idx]
         rec=self.hist["RECALL"][self.idx]; vls=self.hist["VAL_LOSS"][self.idx]
         acc=self.hist["ACCURACY"][self.idx]
-        txt=(f"F1-Score:\t\t{f1:.3f}\n\nPrecision:\t\t{prec:.3f}\n\n"
-             f"Recall:\t\t\t{rec:.3f}\n\nAccuracy:\t\t{acc:.3f}\n\n"
-             f"Val Loss:\t\t{vls:.3f}").expandtabs(4)
-        self.ax_txt.text(0.05,0.95,txt,va="top",ha="left",fontsize=16,wrap=True)
+        txt=(f"F1-Score:\t{f1:.3f}\n\nPrecision:\t{prec:.3f}\n\n"
+             f"Recall:\t\t{rec:.3f}\n\nAccuracy:\t{acc:.3f}\n\n"
+             f"Val Loss:\t{vls:.3f}").expandtabs(4)
+        self.ax_txt.text(0.2,0.95,txt,va="top",ha="left",wrap=True)
         self.fig.suptitle(f"{'Modelo Completo' if self.idx==0 else f'Fold {self.idx}'}",
-                          fontsize=16,weight="bold", ha="right", va="top")
+                          fontsize=16,weight="bold", ha="center", va="top", y=1)
         self.fig.canvas.draw_idle()
 
     def _on_close(self,_event):
         if not self.saved:
             out=cfg.img_dir/f"{self.dataset_name.replace('.csv','')}_{'Modelo Completo' if self.idx==0 else f'Fold_{self.idx}'}_{strftime('%Y%m%d_%H%M%S')}.png"
             try:
-                self.fig.savefig(out,dpi=120,bbox_inches="tight")
+                self.fig.savefig(out,dpi=100,bbox_inches="tight")
                 logging.info("Auto-save figura %s",out.name)
             except Exception: logging.exception("Auto-save falhou")
 
@@ -405,7 +474,7 @@ def train_single_fold(Xtr,ytr,Xv,yv)->tuple[Pipeline,dict[str,float],np.ndarray,
     if imputer=="drop":
         Xtr,ytr=Xtr.dropna(),ytr[Xtr.index]; Xv,yv=Xv.dropna(),yv[Xv.index]
 
-    best_pipe,best_score=None,(np.inf if hp.watch_for.value=="min" else -np.inf)
+    best_pipe,best_score=None,(np.inf if hp.watch_for.value[1]=="min" else -np.inf)
     stagnant=0; trained_ep=0; classes=np.unique(ytr)
 
     for epoch in range(1,hp.epochs+1):
@@ -414,7 +483,7 @@ def train_single_fold(Xtr,ytr,Xv,yv)->tuple[Pipeline,dict[str,float],np.ndarray,
         except Exception: pipe.fit(Xtr,ytr)
         pred=pipe.predict(Xv); prob=pipe.predict_proba(Xv)
         score=_metric_value(hp.watch_for,yv,pred,prob)
-        improve=(score+hp.min_delta<best_score if hp.watch_for.value=="min"
+        improve=(score+hp.min_delta<best_score if hp.watch_for.value[1]=="min"
                  else score-hp.min_delta>best_score)
         if improve: best_score, best_pipe, stagnant=score,copy.deepcopy(pipe),0
         else:
@@ -444,7 +513,7 @@ def fold_scores(hist:dict[str,list[float]])->tuple[list[float],int]:
 
 def train(csv_paths:Optional[Sequence[str]])->Path:
     paths=[Path(p) for p in csv_paths] if csv_paths else None
-    X,y=load_data(paths); print(f"Conjunto de treino: {len(X)} amostras, {X.shape[1]} features")
+    X,y=load_data(paths); print(f"Conjunto de treino: {len(X)} amostras, {X.shape[1]} features, alvo: {hp.watch_for.name} ({hp.watch_for.value[1]})")
     skf=StratifiedKFold(hp.k_folds,shuffle=True)
     hist={m:[np.nan]*hp.k_folds for m in [m for m in BestBy.__members__.keys()]}
     cms,models,epochs_per_fold,val_indices=[],[],[],[]
@@ -479,10 +548,12 @@ def train(csv_paths:Optional[Sequence[str]])->Path:
     cms.insert(0,cm_full); models.insert(0,pipe_full)
 
     mean_f1=np.nanmean(hist["F1_SCORE"][1:]); print(f"F1 médio (k-folds): {mean_f1:.3f}")
-    scores,best_idx=fold_scores(hist); logging.info("Fold scores: %s; best=%d",scores,best_idx)
+    scores,best_idx=fold_scores(hist); logging.info("Fold scores: %s; best=%d",scores,best_idx); print(f"Melhor fold: {best_idx+1}")
+    pprint("Métricas do modelo completo:",{k:v for k,v in metrics_full.items() if not np.isnan(v)})
+    print("Matriz de confusão do modelo completo:\n",cm_full)
 
     arch=_architecture_string(X.shape[1])
-    FoldViewer(cms,hist,hp.watch_for.name,hp.watch_for.value,arch,
+    FoldViewer(cms,hist,hp.watch_for.name,hp.watch_for.value[1],arch,
                "Treinamento",models,X,y,best_idx,val_indices)
 
     model_path=cfg.mdl_dir/f"mlp_{strftime('%Y%m%d_%H%M%S')}.joblib"
@@ -494,7 +565,8 @@ def train(csv_paths:Optional[Sequence[str]])->Path:
 # ─────────────────────────────────────────────────────────────────────────────
 def latest_model()->Path:
     models=sorted(cfg.mdl_dir.glob("mlp_*.joblib"))
-    if not models: sys.exit("Nenhum modelo em .models."); return models[-1]
+    if not models: sys.exit("Nenhum modelo em .models.")
+    return models[-1]
 
 def validate(model_path:Path,csv_paths:Optional[Sequence[str]])->None:
     paths=[Path(p) for p in csv_paths] if csv_paths else None
@@ -503,7 +575,7 @@ def validate(model_path:Path,csv_paths:Optional[Sequence[str]])->None:
     cm=confusion_matrix(y,pred)
 
     plt.figure(figsize=(4,4)); _plot_confusion_matrix(cm,plt.gca()); plt.tight_layout()
-    out=cfg.img_dir/f"{model_path.stem}.png"; plt.savefig(out,dpi=120,bbox_inches="tight")
+    out=cfg.img_dir/f"{model_path.stem}.png"; plt.savefig(out,dpi=100,bbox_inches="tight")
     plt.show(block=True); plt.close(); print("Gráfico salvo em",out); logging.info("Figura %s salva",out.name)
 
 # ─────────────────────────────────────────────────────────────────────────────
