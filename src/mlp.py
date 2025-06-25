@@ -135,7 +135,7 @@ class Activation(str, Enum):
 
 @dataclass(frozen=True, slots=True)
 class HyperParams:
-    k_folds:        int     = 6
+    k_folds:        int     = 8
     batch_size:     int     = 32
     epochs:         int     = 1024
     patience:       int     = 64
@@ -144,8 +144,8 @@ class HyperParams:
     learning_rate:  float   = 1e-3
     
     layers: tuple[tuple[Activation,int],...] = (
-        (Activation.RELU,32),
         (Activation.RELU,8),
+        (Activation.LINEAR,4),
         (Activation.SIGMOID,1)
     )
 
