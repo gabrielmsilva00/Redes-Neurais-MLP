@@ -136,16 +136,16 @@ class Activation(str, Enum):
 @dataclass(frozen=True, slots=True)
 class HyperParams:
     k_folds:        int     = 6
-    epochs:         int     = 512
-    patience:       int     = 16
-    watch_for:      BestBy  = BestBy.PRECISION
-    min_delta:      float   = 1e-5
-    batch_size:     int     = 64
-    learning_rate:  float   = 5e-4
+    batch_size:     int     = 32
+    epochs:         int     = 1024
+    patience:       int     = 64
+    watch_for:      BestBy  = BestBy.FALSE_NEGATIVE
+    min_delta:      float   = 1e-9
+    learning_rate:  float   = 1e-3
     
     layers: tuple[tuple[Activation,int],...] = (
-        (Activation.TANH,7),
-        (Activation.TANH,7),
+        (Activation.RELU,32),
+        (Activation.RELU,8),
         (Activation.SIGMOID,1)
     )
 
@@ -159,7 +159,7 @@ class Config:
     scramble_rows:  bool    = True
     normalize:      bool    = True
     null_value:     Optional[float] = 0
-    fill_strategy:  FillStrategy = FillStrategy.MODE
+    fill_strategy:  FillStrategy = FillStrategy.KEEP
     exclude_cols:   tuple[int,...] = (0,)
 
 cfg, hp = Config(), HyperParams()
