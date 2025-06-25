@@ -1,3 +1,4 @@
+
 import argparse
 import csv
 import ast
@@ -24,12 +25,17 @@ def parse_args():
         help="Target column (index or header name) to apply swaps."
     )
     parser.add_argument(
-        "--swap", "-s",
+        "--swap",
         required=True,
         help=(
             "Tuple of pairs specifying values to swap, "
             "e.g. '((0,1),(1,0))' or \"(('yes','no'),('no','yes'))\"."
         )
+    )
+    parser.add_argument(
+        "--sep", "-s",
+        default=",",
+        help="CSV delimiter to use when reading and writing (default: ',')."
     )
     return parser.parse_args()
 
@@ -38,7 +44,6 @@ def load_swap_mapping(swap_arg):
         mapping_raw = ast.literal_eval(swap_arg)
     except (ValueError, SyntaxError):
         sys.exit("Error: --swap argument is not a valid Python literal.")
-    # Validate structure
     if (
         not hasattr(mapping_raw, "__iter__")
         or any(
@@ -46,12 +51,12 @@ def load_swap_mapping(swap_arg):
             for pair in mapping_raw
         )
     ):
-        sys.exit("Error: --swap must be an iterable of 2‐item tuples.")
+        sys.exit("Error: --swap must be an iterable of 2-item tuples.")
     return dict(mapping_raw)
 
 def apply_swap(value, mapping):
-    # Try matching numeric keys first
     for key, newval in mapping.items():
+        # numeric match
         if isinstance(key, int):
             try:
                 if int(value) == key:
@@ -64,6 +69,7 @@ def apply_swap(value, mapping):
                     return str(newval)
             except ValueError:
                 continue
+        # string match
         elif isinstance(key, str):
             if value == key:
                 return str(newval)
@@ -73,6 +79,7 @@ def main():
     args = parse_args()
     input_path = args.input
     output_path = args.output or input_path
+    sep = args.sep
 
     if not os.path.isfile(input_path):
         sys.exit(f"Error: Input file '{input_path}' not found.")
@@ -80,9 +87,9 @@ def main():
     swap_mapping = load_swap_mapping(args.swap)
     target_arg = args.target
 
-    # Read entire CSV into memory
+    # Read the CSV
     with open(input_path, newline="", encoding="utf-8") as infile:
-        reader = csv.reader(infile)
+        reader = csv.reader(infile, delimiter=sep)
         rows = list(reader)
 
     if not rows:
@@ -101,7 +108,7 @@ def main():
             sys.exit(f"Error: Column name '{target_arg}' not found in header.")
         col_index = header.index(target_arg)
 
-    # Process each data row
+    # Process rows
     processed = [header]
     for row_num, row in enumerate(data_rows, start=2):
         if len(row) <= col_index:
@@ -109,16 +116,16 @@ def main():
                 f"Error: Row {row_num} has only {len(row)} columns; "
                 f"cannot access column {col_index}."
             )
-        original = row[col_index]
-        row[col_index] = apply_swap(original, swap_mapping)
+        row[col_index] = apply_swap(row[col_index], swap_mapping)
         processed.append(row)
 
-    # Write back out
+    # Write out with specified delimiter
     with open(output_path, "w", newline="", encoding="utf-8") as outfile:
-        writer = csv.writer(outfile)
+        writer = csv.writer(outfile, delimiter=sep)
         writer.writerows(processed)
 
     print(f"Swapping complete. Output written to '{output_path}'.")
 
 if __name__ == "__main__":
     main()
+
