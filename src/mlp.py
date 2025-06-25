@@ -12,14 +12,11 @@ exibindo um painel gráfico com métricas e matrizes de confusão para cada *fol
 
 FUNCIONALIDADES PRINCIPAIS
 --------------------------
-• Treinamento k-fold estratificado com parada antecipada por métrica.  
-• Cálculo e registro de 11 métricas (F1, loss, precisão, recall, etc.).  
-• Seleção automática do melhor *fold* e visualização em um painel 2×2
-  (menu, matriz de confusão, descrição da arquitetura e métricas).  
+• Treinamento k-fold estratificado com parada antecipada por métrica (BestBy).  
+• Cálculo e registro de múltiplas métricas (F1, loss, precisão, recall, etc.).  
 • Navegação pelos *folds* através de botões, *scrollbar* e salvar a figura
   atual (.png).  
-• Re-cálculo instantâneo das métricas quando um novo CSV é carregado.  
-• Validação offline de modelos já treinados, com geração da matriz de
+• Validação de modelos já treinados, com geração da matriz de
   confusão correspondente.  
 • Log completo de sessão, salvamento automático de figuras e *joblib* do
   modelo completo.
@@ -69,34 +66,41 @@ e podem ser alterados antes da execução:
 
 DEPENDÊNCIAS
 ------------
-Python ≥3.10, scikit-learn ≥1.3, pandas, numpy, matplotlib, joblib.
+Python ≥3.10, scikit-learn ≥1.3, pandas, numpy, matplotlib, jb.
 
 Execute `python mlp.py -h` para ajuda nas flags da CLI.
 """
 
 from __future__ import annotations
+
 import sys, copy, logging, platform, shutil, warnings, traceback
-from pprint             import pprint
+
+from typing             import Optional, Sequence
 from enum               import Enum
 from pathlib            import Path
 from argparse           import ArgumentParser, Namespace
 from dataclasses        import dataclass, asdict
 from time               import perf_counter, strftime
-from typing             import Optional, Sequence
+from pprint             import pprint
 
-import joblib
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-import matplotlib.gridspec as mgs
-import numpy as np
-import pandas as pd
-from matplotlib.widgets  import Button
+import joblib               as jb
+import matplotlib.pyplot    as plt
+import matplotlib.patches   as mpatches
+import matplotlib.gridspec  as mgs
+import numpy                as np
+import pandas               as pd
 
-from sklearn.experimental import enable_iterative_imputer  # noqa: F401
-from sklearn.impute       import IterativeImputer, SimpleImputer
-from sklearn.metrics      import (
-    classification_report, confusion_matrix, f1_score, log_loss,
-    precision_score, recall_score,
+from matplotlib.widgets     import Button
+
+from sklearn.experimental   import enable_iterative_imputer
+
+from sklearn.impute         import IterativeImputer, SimpleImputer
+from sklearn.metrics        import (
+    classification_report,
+    confusion_matrix,
+    f1_score, log_loss,
+    precision_score,
+    recall_score,
 )
 from sklearn.model_selection import StratifiedKFold
 from sklearn.neural_network  import MLPClassifier
@@ -137,12 +141,11 @@ class HyperParams:
     watch_for:      BestBy  = BestBy.PRECISION
     min_delta:      float   = 4e-6
     batch_size:     int     = 32
-    learning_rate:  float   = 8e-4
+    learning_rate:  float   = 5e-4
     
     layers: tuple[tuple[Activation,int],...] = (
         (Activation.TANH,7),
         (Activation.TANH,7),
-        (Activation.SIGMOID,2),
         (Activation.SIGMOID,1)
     )
 
@@ -156,10 +159,13 @@ class Config:
     scramble_rows:  bool    = True
     normalize:      bool    = True
     null_value:     Optional[float] = 0
-    fill_strategy:  FillStrategy = FillStrategy.KEEP
+    fill_strategy:  FillStrategy = FillStrategy.MEAN
     exclude_cols:   tuple[int,...] = (0,)
 
 cfg, hp = Config(), HyperParams()
+
+# ─────────────────────────────────────────────────────────────────────────────
+
 for d in (cfg.csv_dir,cfg.img_dir,cfg.mdl_dir,cfg.log_dir): d.mkdir(exist_ok=True)
 
 logging.basicConfig(
@@ -175,9 +181,6 @@ for k,v in [("===== SESSION START =====",""),
 plt.rcParams.update({"font.family":"monospace","font.size":12})
 warnings.filterwarnings("ignore",category=UserWarning)
 
-# ─────────────────────────────────────────────────────────────────────────────
-# UTILIDADES DE ARQUIVOS
-# ─────────────────────────────────────────────────────────────────────────────
 def _collect_csv_files()->list[Path]:
     csv_files = sorted(list(cfg.csv_dir.glob("*.csv")))
     if csv_files: return csv_files
@@ -189,9 +192,6 @@ def _collect_csv_files()->list[Path]:
 def _validate_indices(idxs:Sequence[int], total:int, label:str)->None:
     if not all(-total<=i<total for i in idxs): sys.exit(f"{label} fora do intervalo.")
 
-# ─────────────────────────────────────────────────────────────────────────────
-# CARGA E PREPARO DE DADOS
-# ─────────────────────────────────────────────────────────────────────────────
 def load_data(csv_paths:Optional[Sequence[Path]]=None)->tuple[pd.DataFrame,np.ndarray]:
     try:
         files=list(csv_paths) if csv_paths else _collect_csv_files()
@@ -236,9 +236,6 @@ def make_classifier()->MLPClassifier:
         learning_rate="adaptive",warm_start=True,
         batch_size=hp.batch_size,max_iter=1)
 
-# ─────────────────────────────────────────────────────────────────────────────
-# MÉTRICAS
-# ─────────────────────────────────────────────────────────────────────────────
 def _metric_value(name:BestBy,y_true,y_pred,prob=None)->float:
     cm=confusion_matrix(y_true,y_pred)
     tn,fp,fn,tp=cm.ravel(); s=tn+fp+fn+tp
@@ -256,9 +253,6 @@ def _metric_value(name:BestBy,y_true,y_pred,prob=None)->float:
         case BestBy.ACCURACY:        return (tp+tn)/s if s else 0
         case _:                      return 0.0
 
-# ─────────────────────────────────────────────────────────────────────────────
-# PLOTAGEM
-# ─────────────────────────────────────────────────────────────────────────────
 def _plot_confusion_matrix(cm:np.ndarray,ax:plt.Axes)->None:
     ax.imshow(cm,cmap="Greens",vmin=0,vmax=cm.max(),interpolation="nearest")
     for i in range(2):
@@ -271,12 +265,11 @@ def _plot_confusion_matrix(cm:np.ndarray,ax:plt.Axes)->None:
 def _architecture_string(n_features:int)->str:
     return (
         f"Features:\t{n_features}\n\n"
-        f"[Architecture]\n\nMax Epochs:\t{hp.epochs}\n"
+        f"[Architecture]\n\nMax Epochs:\t\t{hp.epochs}\n"
+        f"Best By:\t\t{hp.watch_for.name} ({hp.watch_for.value[1]})\n"
+        f"Patience:\t\t{hp.patience}\n"
         f"Learning Rate:\t{hp.learning_rate}\n"
-        f"Batch Size:\t{hp.batch_size}\n"
-        f"Patience:\t{hp.patience}\n"
-        f"Best By:\t{hp.watch_for.name} ({hp.watch_for.value[1]})\n"
-        f"Min. Delta:\t{hp.min_delta}\n"
+        f"Min. Delta:\t\t{hp.min_delta}\n"
         f"Layers:{"\n\t"+"\n\t".join(f"{u} {a.value}" for a,u in hp.layers)}"
     ).expandtabs(4)
 
@@ -341,7 +334,6 @@ class FoldViewer:
         bb=ax.get_position()
         return [bb.x0+x*bb.width, bb.y0+y*bb.height, w*bb.width, h*bb.height]
 
-    # ── lista de folds ─────────────────────────────────────────────────────
     def _create_fold_buttons(self):
         for btn in getattr(self,"fold_btn_objs",[]): btn.ax.remove()
         self.fold_btn_objs=[]
@@ -356,7 +348,7 @@ class FoldViewer:
         self.btn_down=Button(dn_ax,"↓"); self.btn_down.on_clicked(self._scroll_down)
 
         vis=list(range(self.scroll,min(self.scroll+self.max_visible,self.n)))
-        area_h=0.92-2*(btn_h+gap)          # espaço entre ↑ e ↓
+        area_h=0.92-2*(btn_h+gap)
         slot_h=area_h/self.max_visible
         for row,i in enumerate(vis):
             y= 0.96 - (btn_h+gap) - (row+1)*slot_h + slot_h*0.2
@@ -529,7 +521,6 @@ def train(csv_paths:Optional[Sequence[str]])->Path:
         print(f"\tFold {fold}:\tEpochs={n_epochs:<4}\tF1={metrics['F1_SCORE']:.3f}"
               f"\tAcc={metrics['ACCURACY']:.3f}\tLoss={metrics['VAL_LOSS']:.3f}")
 
-    # modelo completo
     imputer=make_imputer(); steps=[] if imputer=="drop" else [("imputer",imputer)]
     if cfg.normalize: steps.append(("scaler",StandardScaler()))
     steps.append(("mlp",MLPClassifier(hidden_layer_sizes=tuple(u for _,u in hp.layers if u>1),
@@ -551,8 +542,8 @@ def train(csv_paths:Optional[Sequence[str]])->Path:
     cms.insert(0,cm_full); models.insert(0,pipe_full)
 
     mean_f1=np.nanmean(hist["F1_SCORE"][1:]); print(f"F1 médio (k-folds): {mean_f1:.3f}")
-    scores,best_idx=fold_scores(hist); logging.info("Fold scores: %s; best=%d",scores,best_idx); print(f"Melhor fold: {best_idx+1}")
-    pprint(f"Métricas do modelo completo: {metrics_full}")
+    scores,best_idx=fold_scores(hist); logging.info("Fold scores: %s; best=%d",scores,best_idx)
+    pprint(f"Métricas do modelo completo: {metrics_full.items()}")
     pprint(f"Matriz de confusão do modelo completo:\n{cm_full}")
 
     arch=_architecture_string(X.shape[1])
@@ -560,12 +551,9 @@ def train(csv_paths:Optional[Sequence[str]])->Path:
                "Treinamento",models,X,y,best_idx,val_indices)
 
     model_path=cfg.mdl_dir/f"mlp_{strftime('%Y%m%d_%H%M%S')}.joblib"
-    joblib.dump(pipe_full,model_path); print("Modelo salvo em",model_path)
+    jb.dump(pipe_full,model_path); print("Modelo salvo em",model_path)
     return model_path
 
-# ─────────────────────────────────────────────────────────────────────────────
-# VALIDAÇÃO DE MODELOS
-# ─────────────────────────────────────────────────────────────────────────────
 def latest_model()->Path:
     models=sorted(cfg.mdl_dir.glob("mlp_*.joblib"))
     if not models: sys.exit("Nenhum modelo em .models.")
@@ -573,7 +561,7 @@ def latest_model()->Path:
 
 def validate(model_path:Path,csv_paths:Optional[Sequence[str]])->None:
     paths=[Path(p) for p in csv_paths] if csv_paths else None
-    X,y=load_data(paths); pipe:Pipeline=joblib.load(model_path)
+    X,y=load_data(paths); pipe:Pipeline=jb.load(model_path)
     pred=pipe.predict(X); print(classification_report(y,pred,digits=3))
     cm=confusion_matrix(y,pred)
 
