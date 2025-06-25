@@ -144,8 +144,9 @@ class HyperParams:
     learning_rate:  float   = 1e-3
     
     layers: tuple[tuple[Activation,int],...] = (
-        (Activation.RELU,8),
-        (Activation.LINEAR,4),
+        (Activation.TANH,8),
+        (Activation.TANH,4),
+        (Activation.LINEAR,2),
         (Activation.SIGMOID,1)
     )
 
