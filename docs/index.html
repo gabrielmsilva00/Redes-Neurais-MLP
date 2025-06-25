@@ -11,6 +11,7 @@
     :root {
       /* Paleta Dark AMOLED */
       --color-primary: #BB86FC;
+      --color-dark: hsl(267, 100%, 50%);
       --color-secondary: #03DAC6;
       --color-background: #000000;
       --color-surface: #121212;
@@ -30,6 +31,21 @@
       font-family: var(--font-family);
       line-height: 1.6;
       padding-top: calc(var(--spacing-unit) * 5);
+    }
+    footer {
+      text-align: center;
+      padding: var(--spacing-unit);
+      background-color: var(--color-surface);
+      color: var(--color-on-surface);
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      box-shadow: var(--elevation);
+    }
+    a {
+      color: var(--color-dark);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
     }
     nav {
       position: fixed;
@@ -165,7 +181,7 @@
             </ul>
             <div class="image-container">
               <img src="./content/cmatrix.png" alt="Matriz de Confusão" style="width: 100%; height: auto; border-radius: 4px;">
-              <small>Figura 1: Matriz de Confusão de Modelos MLP (classificação binária)</small>
+              <small>Figura 1: Matriz de Confusão de Modelos MLP (classificação binária) [Fonte: <a href="https://www.researchgate.net/figure/Confusion-matrix-and-performance-evaluation-metrics_fig5_346062755">ResearchGate</a>]</small>
             </div>
           </div>
         </div>
@@ -260,7 +276,7 @@ class Config:
 
   <template id="results-template">
     <section id="results">
-      <h2>Resultados</h2>
+      <h2>Conclusão</h2>
       <div class="card-grid">
         <div class="card">
           <h3>Aprendizado</h3>
@@ -318,4 +334,7 @@ class Config:
     });
   </script>
 </body>
+<footer>
+  <p>© 2025 Gabriel Maia <a href="https://github.com/gabrielmsilva00">@GabrielMSilva00</a></p>
+</footer>
 </html>
