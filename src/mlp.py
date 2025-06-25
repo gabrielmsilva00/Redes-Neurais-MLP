@@ -135,13 +135,13 @@ class Activation(str, Enum):
 
 @dataclass(frozen=True, slots=True)
 class HyperParams:
-    k_folds:        int     = 12
-    epochs:         int     = 256
-    patience:       int     = 32
+    k_folds:        int     = 6
+    epochs:         int     = 512
+    patience:       int     = 16
     watch_for:      BestBy  = BestBy.PRECISION
-    min_delta:      float   = 4e-6
-    batch_size:     int     = 32
-    learning_rate:  float   = 6e-4
+    min_delta:      float   = 1e-5
+    batch_size:     int     = 64
+    learning_rate:  float   = 5e-4
     
     layers: tuple[tuple[Activation,int],...] = (
         (Activation.TANH,7),
@@ -151,15 +151,15 @@ class HyperParams:
 
 @dataclass(frozen=True, slots=True)
 class Config:
-    csv_dir:       Path = Path(".data")
-    log_dir:       Path = Path(".log")
-    img_dir:       Path = Path(".img")
-    mdl_dir:       Path = Path(".models")
+    csv_dir:        Path    = Path(".data")
+    log_dir:        Path    = Path(".log")
+    img_dir:        Path    = Path(".img")
+    mdl_dir:        Path    = Path(".models")
     csv_sep:        str     = ";"
     scramble_rows:  bool    = True
     normalize:      bool    = True
     null_value:     Optional[float] = 0
-    fill_strategy:  FillStrategy = FillStrategy.MEAN
+    fill_strategy:  FillStrategy = FillStrategy.MODE
     exclude_cols:   tuple[int,...] = (0,)
 
 cfg, hp = Config(), HyperParams()
@@ -274,7 +274,7 @@ def _architecture_string(n_features:int)->str:
         f"Dataset:{get_dataset_name()}\n\n"
         f"Features:\t{n_features}\n\n"
         f"[Architecture]\n\nMax Epochs:\t\t{hp.epochs}\n"
-        f"Best By:\t\t{hp.watch_for.name} ({hp.watch_for.value[1]})\n"
+        f"Best By ({hp.watch_for.value[1]}):\t{hp.watch_for.name}\n"
         f"Patience:\t\t{hp.patience}\n"
         f"Learning Rate:\t{hp.learning_rate}\n"
         f"Min. Delta:\t\t{hp.min_delta}\n"
