@@ -61,8 +61,8 @@ e podem ser alterados antes da execução:
     hp.epochs             Épocas máximas por *fold*
     hp.patience           Tolerância sem melhora para *early-stopping*
     hp.watch_for          Métrica monitorada (F1, loss, etc.)
-    hp.layers             Lista de tuplas (ativação, unidades) incluindo
-                          a saída (unidade = 1)
+    hp.activation         Função de ativação da rede
+    hp.layers             Nº de camadas e unidades por camada
 
 DEPENDÊNCIAS
 ------------
@@ -75,38 +75,43 @@ from __future__ import annotations
 
 import sys, copy, logging, platform, shutil, warnings, traceback
 
-from typing             import Optional, Sequence
-from enum               import Enum
-from pathlib            import Path
-from argparse           import ArgumentParser, Namespace
-from dataclasses        import dataclass, asdict
-from time               import perf_counter, strftime
-from pprint             import pprint
+from numbers                    import Number
+from enum                       import Enum
+from pathlib                    import Path
+from argparse                   import ArgumentParser, Namespace
+from dataclasses                import dataclass, asdict
+from time                       import perf_counter, strftime
+from typing                     import (
+    Optional,
+    Sequence,
+    Annotated,
+    Any,
+    get_args,
+    get_origin,
+    overload
+)
 
-import joblib               as jb
-import matplotlib.pyplot    as plt
-import matplotlib.patches   as mpatches
-import matplotlib.gridspec  as mgs
-import numpy                as np
-import pandas               as pd
+import joblib                   as jb
+import matplotlib.pyplot        as plt
+import matplotlib.patches       as mpatches
+import matplotlib.gridspec      as mgs
+import numpy                    as np
+import pandas                   as pd
 
-from matplotlib.widgets     import Button
+from matplotlib.widgets         import Button
 
-from sklearn.experimental   import enable_iterative_imputer
-
-from sklearn.impute         import IterativeImputer, SimpleImputer
-from sklearn.metrics        import (
+from sklearn.impute             import SimpleImputer
+from sklearn.model_selection    import StratifiedKFold
+from sklearn.neural_network     import MLPClassifier
+from sklearn.pipeline           import Pipeline
+from sklearn.preprocessing      import StandardScaler
+from sklearn.metrics            import (
     classification_report,
     confusion_matrix,
     f1_score, log_loss,
     precision_score,
     recall_score,
 )
-from sklearn.model_selection import StratifiedKFold
-from sklearn.neural_network  import MLPClassifier
-from sklearn.pipeline        import Pipeline
-from sklearn.preprocessing   import StandardScaler
-
 # ─────────────────────────────────────────────────────────────────────────────
 # ENUMS & CONFIG
 # ─────────────────────────────────────────────────────────────────────────────
@@ -123,8 +128,15 @@ class BestBy(Enum):
     PRECISION       = (9, "max")
     RECALL          = (10, "max")
 
-class FillStrategy(Enum):
-    MEAN=1; MEDIAN=2; MODE=3; ITER=4; KEEP=5; ZERO=6
+class FillStrategy(str, Enum):
+    # MEAN=1; MEDIAN=2; MODE=3; ITER=4; KEEP=5; ZERO=6
+    MEAN="mean"; MEDIAN="median"; MODE="most_frequent"; KEEP="constant"; ZERO="zero"
+
+class Solver(str, Enum):
+    LBFGS="lbfgs"; SGD="sgd"; ADAM="adam"
+
+class LearningRate(str, Enum):
+    CONSTANT="constant"; INVSCALING="invscaling"; ADAPTIVE="adaptive"
 
 class Activation(str, Enum):
     RELU="relu"; TANH="tanh"; LINEAR="identity"; SIGMOID="logistic"
@@ -135,20 +147,16 @@ class Activation(str, Enum):
 
 @dataclass(frozen=True, slots=True)
 class HyperParams:
+    val_split:      float   = 0.5
     k_folds:        int     = 8
-    batch_size:     int     = 32
     epochs:         int     = 1024
     patience:       int     = 64
     watch_for:      BestBy  = BestBy.FALSE_NEGATIVE
-    min_delta:      float   = 3e-6
-    learning_rate:  float   = 6e-3
+    learning_rate:  Number  = 5e-3
+    min_delta:      Number  = 5e-5 # * Learning Rate
     
-    layers: tuple[tuple[Activation,int],...] = (
-        (Activation.TANH,8),
-        (Activation.TANH,4),
-        (Activation.LINEAR,2),
-        (Activation.SIGMOID,1)
-    )
+    activation:     Activation      = Activation.TANH
+    layers:         tuple[int, ...] = (8, 4, 2)
 
 @dataclass(frozen=True, slots=True)
 class Config:
@@ -156,86 +164,105 @@ class Config:
     log_dir:        Path    = Path(".log")
     img_dir:        Path    = Path(".img")
     mdl_dir:        Path    = Path(".models")
-    csv_sep:        str     = ";"
-    scramble_rows:  bool    = True
-    normalize:      bool    = True
-    null_value:     Optional[float] = 0
-    fill_strategy:  FillStrategy = FillStrategy.KEEP
-    exclude_cols:   tuple[int,...] = (0,)
+    
+    csv_sep:        str             = ";"
+    header :        Optional[int]   = None
+    scramble_rows:  bool            = True
+    normalize:      bool            = True
+    
+    null_value:     Optional[Number]            = 0
+    exclude_cols:   Optional[tuple[int,...]]    = (0,)
+    fill_strategy:  FillStrategy                = FillStrategy.KEEP
+
 
 cfg, hp = Config(), HyperParams()
 
-# ─────────────────────────────────────────────────────────────────────────────
-
-for d in (cfg.csv_dir,cfg.img_dir,cfg.mdl_dir,cfg.log_dir): d.mkdir(exist_ok=True)
+plt.rcParams.update({"font.family":"monospace","font.size":12})
+warnings.filterwarnings("ignore",category=UserWarning)
+for d in (
+    cfg.csv_dir,
+    cfg.img_dir,
+    cfg.mdl_dir,
+    cfg.log_dir
+):  d.mkdir(exist_ok=True)
 
 logging.basicConfig(
     filename=cfg.log_dir/f"{strftime('%Y%m%d_%H%M%S')}.log",
     level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s",
     encoding="utf-8"
 )
-for k,v in [("===== SESSION START =====",""),
-            ("OS",platform.platform()),("Python",sys.version.replace("\n"," ")),
-            ("Arch",platform.machine()),("Config",asdict(cfg)),
-            ("HyperParams",asdict(hp))]: logging.info("%s: %s",k,v)
+for k,v in [
+    ("===== SESSION START =====",""),
+    ("OS",platform.platform()),
+    ("Python",sys.version.replace("\n"," ")),
+    ("Arch",platform.machine()),
+    ("Config",asdict(cfg)),
+    ("HyperParams",asdict(hp))
+]:  logging.info("%s: %s",k,v)
 
-plt.rcParams.update({"font.family":"monospace","font.size":12})
-warnings.filterwarnings("ignore",category=UserWarning)
-
-def _collect_csv_files()->list[Path]:
-    csv_files = sorted(list(cfg.csv_dir.glob("*.csv")))
-    if csv_files: return csv_files
-    root=list(Path().glob("*.csv"))
-    if not root: sys.exit("Nenhum CSV encontrado.")
-    for csv in root: shutil.move(csv, cfg.csv_dir/csv.name)
-    sys.exit("CSV movidos para .data; execute novamente.")
-
-def _validate_indices(idxs:Sequence[int], total:int, label:str)->None:
-    if not all(-total<=i<total for i in idxs): sys.exit(f"{label} fora do intervalo.")
+# ─────────────────────────────────────────────────────────────────────────────
 
 def load_data(csv_paths:Optional[Sequence[Path]]=None)->tuple[pd.DataFrame,np.ndarray]:
     try:
-        files=list(csv_paths) if csv_paths else _collect_csv_files()
-        frames=[pd.read_csv(f,sep=cfg.csv_sep,dtype=str) for f in files]
+        if csv_paths:
+            files = list(csv_paths)
+        elif (csv_files := sorted(list(cfg.csv_dir.glob("*.csv")))):
+            files = csv_files
+        else:
+            root=list(Path().glob("*.csv"))
+            if not root: sys.exit("Nenhum CSV encontrado.")
+            for csv in root: shutil.move(csv, cfg.csv_dir/csv.name)
+            sys.exit("CSV movidos para .data; execute novamente.")
+        
+        frames=[pd.read_csv(f,sep=cfg.csv_sep,dtype=str, header=cfg.header) for f in files]
         data=pd.concat(frames,ignore_index=True)
+    except SystemExit: raise
     except Exception: sys.exit(f"Falha ao carregar CSV:\n{traceback.format_exc()}")
 
-    if cfg.scramble_rows: data=data.sample(frac=1,ignore_index=True)
     data=data.apply(pd.to_numeric,errors="coerce")
 
     total_cols=data.shape[1]
-    _validate_indices((-1,),total_cols,"Target")
-    _validate_indices(cfg.exclude_cols,total_cols,"exclude_cols")
+    if not all(-total_cols<=i<total_cols for i in cfg.exclude_cols): sys.exit(f"Coluna de Exclusão fora do intervalo.")
 
     y=data.iloc[:,list((-1,))].values.ravel()
     predictors=data.copy()
-    drop=set(cfg.exclude_cols)|set((-1,))
-    pred_cols=predictors.columns.difference(predictors.columns[list(drop)])
+    pred_cols=predictors.columns
 
     if cfg.null_value is not None:
         mask=predictors[pred_cols]==cfg.null_value
+        if cfg.exclude_cols: mask.loc[:,cfg.exclude_cols]=False
         predictors.loc[mask.index,pred_cols]=predictors[pred_cols].where(~mask,np.nan)
 
-    X=predictors[pred_cols]
+    X=predictors[pred_cols].drop(columns=len(pred_cols)-1)
     if X.empty: sys.exit("Sem colunas preditoras.")
+    print("Primeiras 10 amostras:\n", X.head(10), "\n")
     return X,y
 
-def make_imputer()->IterativeImputer|SimpleImputer|str:
-    return {
-        FillStrategy.ITER:IterativeImputer(),
-        FillStrategy.MEDIAN:SimpleImputer(strategy="median"),
-        FillStrategy.MODE:SimpleImputer(strategy="most_frequent"),
-        FillStrategy.KEEP:SimpleImputer(strategy="constant",fill_value=cfg.null_value),
-        FillStrategy.ZERO:SimpleImputer(strategy="constant",fill_value=0),
-    }.get(cfg.fill_strategy,SimpleImputer(strategy="mean"))
-
 def make_classifier()->MLPClassifier:
-    hidden=tuple(u for _,u in hp.layers if u>1)
     return MLPClassifier(
-        hidden_layer_sizes=hidden,activation=hp.layers[0][0].value,
-        solver="sgd",learning_rate_init=hp.learning_rate,
-        learning_rate="adaptive",warm_start=True,
-        batch_size=hp.batch_size,max_iter=1)
+        max_iter            = hp.epochs,
+        shuffle             = True,
+        
+        solver              = 'adam',
+        learning_rate_init  = hp.learning_rate,
+        learning_rate       = "adaptive",
+        activation          = hp.activation.value,
+        hidden_layer_sizes  = hp.layers,
+        
+        early_stopping      = True,
+        validation_fraction = hp.val_split,
+        warm_start          = True,
+        n_iter_no_change    = hp.patience,
+        tol                 = hp.learning_rate * hp.min_delta,
+    )
+
+def make_imputer()->SimpleImputer:
+    return SimpleImputer(
+        strategy=cfg.fill_strategy.value,
+        fill_value=cfg.null_value if cfg.fill_strategy is FillStrategy.KEEP else None,
+        add_indicator=True,
+        keep_empty_features=True,
+    )
 
 def _metric_value(name:BestBy,y_true,y_pred,prob=None)->float:
     cm=confusion_matrix(y_true,y_pred)
@@ -272,14 +299,16 @@ def get_dataset_name()->str:
 
 def _architecture_string(n_features:int)->str:
     return (
-        f"Dataset:{get_dataset_name()}\n\n"
-        f"Features:\t{n_features}\n\n"
+        f"Dataset:{get_dataset_name()}\n"
+        f"Features:\t\t{n_features}\n"
+        f"Null Value:\t\t{cfg.null_value}\n"
+        f"Imputer:\t\t{cfg.fill_strategy.name}\n\n"
         f"Max Epochs:\t\t{hp.epochs}\n"
         f"Best By ({hp.watch_for.value[1]}):\t{hp.watch_for.name}\n"
         f"Patience:\t\t{hp.patience}\n"
         f"Learning Rate:\t{hp.learning_rate}\n"
-        f"Min. Delta:\t\t{hp.min_delta}\n"
-        f"Layers:{"\n\t"+"\n\t".join(f"{u} {a.value}" for a,u in hp.layers)}"
+        f"Min. Delta:\t\t{hp.min_delta}\n\n"
+        f"Layers ({hp.activation.value}):{"\n\t"+" → ".join(f"{u}" for u in hp.layers)}"
     ).expandtabs(4)
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -443,7 +472,7 @@ class FoldViewer:
             self.fig.savefig(out,dpi=100,bbox_inches="tight")
             print("Figura salva em",out); logging.info("Figura %s salva",out.name)
             self.saved=True
-        except Exception as exc: print(f"Falha ao salvar figura: {exc}")
+        except Exception: print(f"Falha ao salvar figura: \n{traceback.format_exc()}")
 
     # ── desenho principal ──────────────────────────────────────────────────
     def _draw(self):
@@ -471,6 +500,16 @@ class FoldViewer:
 # ─────────────────────────────────────────────────────────────────────────────
 # TREINAMENTO
 # ─────────────────────────────────────────────────────────────────────────────
+def fold_scores(hist:dict[str,list[float]])->tuple[list[float],int]:
+    n=len(next(iter(hist.values()))); scores=[0.0]*n
+    for rank,m in enumerate(BestBy):
+        if m.name not in hist: continue
+        vals=hist[m.name]; lo,hi=np.nanmin(vals),np.nanmax(vals)
+        for i,v in enumerate(vals):
+            norm=0.5 if hi==lo else (v-lo)/(hi-lo); norm=1-norm if m.value=="min" else norm
+            scores[i]+=(len(BestBy)-rank)*norm
+    best=int(max(range(n),key=scores.__getitem__)); return scores,best
+
 def train_single_fold(Xtr,ytr,Xv,yv)->tuple[Pipeline,dict[str,float],np.ndarray,int]:
     imputer=make_imputer(); steps=[] if imputer=="drop" else [("imputer",copy.deepcopy(imputer))]
     if cfg.normalize: steps.append(("scaler",StandardScaler()))
@@ -487,8 +526,8 @@ def train_single_fold(Xtr,ytr,Xv,yv)->tuple[Pipeline,dict[str,float],np.ndarray,
         except Exception: pipe.fit(Xtr,ytr)
         pred=pipe.predict(Xv); prob=pipe.predict_proba(Xv)
         score=_metric_value(hp.watch_for,yv,pred,prob)
-        improve=(score+hp.min_delta<best_score if hp.watch_for.value[1]=="min"
-                 else score-hp.min_delta>best_score)
+        improve=(score+(hp.learning_rate*hp.min_delta)<best_score if hp.watch_for.value[1]=="min"
+                 else score-(hp.learning_rate*hp.min_delta)>best_score)
         if improve: best_score, best_pipe, stagnant=score,copy.deepcopy(pipe),0
         else:
             stagnant+=1
@@ -504,16 +543,6 @@ def train_single_fold(Xtr,ytr,Xv,yv)->tuple[Pipeline,dict[str,float],np.ndarray,
                     "DIFF_POSITIVE":(tp-fp)/s,"DIFF_NEGATIVE":(tn-fn)/s,
                     "ACCURACY":(tp+tn)/s})
     return pipe,metrics,cm,trained_ep
-
-def fold_scores(hist:dict[str,list[float]])->tuple[list[float],int]:
-    n=len(next(iter(hist.values()))); scores=[0.0]*n
-    for rank,m in enumerate(BestBy):
-        if m.name not in hist: continue
-        vals=hist[m.name]; lo,hi=np.nanmin(vals),np.nanmax(vals)
-        for i,v in enumerate(vals):
-            norm=0.5 if hi==lo else (v-lo)/(hi-lo); norm=1-norm if m.value=="min" else norm
-            scores[i]+=(len(BestBy)-rank)*norm
-    best=int(max(range(n),key=scores.__getitem__)); return scores,best
 
 def train(csv_paths:Optional[Sequence[str]])->Path:
     paths=[Path(p) for p in csv_paths] if csv_paths else None
@@ -532,9 +561,12 @@ def train(csv_paths:Optional[Sequence[str]])->Path:
 
     imputer=make_imputer(); steps=[] if imputer=="drop" else [("imputer",imputer)]
     if cfg.normalize: steps.append(("scaler",StandardScaler()))
-    steps.append(("mlp",MLPClassifier(hidden_layer_sizes=tuple(u for _,u in hp.layers if u>1),
-        activation=hp.layers[0][0].value,solver="adam",
-        learning_rate_init=hp.learning_rate,max_iter=hp.epochs)))
+    steps.append(
+        (
+            "mlp",
+            make_classifier(),
+        )
+    )
     pipe_full=Pipeline(steps); pipe_full.fit(X,y)
     pred_full,prob_full=pipe_full.predict(X),pipe_full.predict_proba(X)
     cm_full=confusion_matrix(y,pred_full)
@@ -552,8 +584,7 @@ def train(csv_paths:Optional[Sequence[str]])->Path:
 
     mean_f1=np.nanmean(hist["F1_SCORE"][1:]); print(f"F1 médio (k-folds): {mean_f1:.3f}")
     scores,best_idx=fold_scores(hist); logging.info("Fold scores: %s; best=%d",scores,best_idx)
-    pprint(f"Métricas do modelo completo: {metrics_full.items()}")
-    pprint(f"Matriz de confusão do modelo completo:\n{cm_full}")
+    print(f"Matriz de confusão do modelo completo:\n{cm_full}")
 
     arch=_architecture_string(X.shape[1])
     FoldViewer(cms,hist,hp.watch_for.name,hp.watch_for.value[1],arch,
