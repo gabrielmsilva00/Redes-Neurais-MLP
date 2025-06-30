@@ -147,7 +147,7 @@ class Activation(str, Enum):
 
 @dataclass(frozen=True, slots=True)
 class HyperParams:
-    val_split:      float   = 0.5
+    val_split:      float   = 0.2
     k_folds:        int     = 8
     epochs:         int     = 1024
     patience:       int     = 64
@@ -164,6 +164,7 @@ class Config:
     log_dir:        Path    = Path(".log")
     img_dir:        Path    = Path(".img")
     mdl_dir:        Path    = Path(".models")
+    cfg_dir:        Path    = Path(".config")
     
     csv_sep:        str             = ";"
     header :        Optional[int]   = None
@@ -174,7 +175,6 @@ class Config:
     exclude_cols:   Optional[tuple[int,...]]    = (0,)
     fill_strategy:  FillStrategy                = FillStrategy.KEEP
 
-
 cfg, hp = Config(), HyperParams()
 
 plt.rcParams.update({"font.family":"monospace","font.size":12})
@@ -183,7 +183,8 @@ for d in (
     cfg.csv_dir,
     cfg.img_dir,
     cfg.mdl_dir,
-    cfg.log_dir
+    cfg.log_dir,
+    cfg.cfg_dir
 ):  d.mkdir(exist_ok=True)
 
 logging.basicConfig(
