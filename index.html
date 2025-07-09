@@ -83,7 +83,7 @@
           <h4>Base de Dados</h4>
           <p>A base de dados utilizada foi pima.csv, contendo 768 instâncias de mulheres indígenas da etnia norteamericana Pima testadas por diabetes.</p>
           <p>A base de dados contém 8 atributos e 1 classe binária.</p>
-          <p>A base também contém diversas entradas nulas, representadas pelo valor numérico 0, que NÃO foram tratadas no treinamento do modelo, propositalmente. Isto garantiu a robustez do modelo, uma vez que a inputação arbitrária de dados poderia comprometer seu uso em um cenário real. Ademais, a inputação de dados não gerou uma melhora perceptível acima de 5% nas métricas de F1 Score e Perda.</p>
+          <p>A base também contém diversas entradas nulas, representadas pelo valor numérico 0, que NÃO foram inputadas no treinamento do modelo, propositalmente. Isto garantiu a robustez do modelo, uma vez que a inputação arbitrária de dados poderia comprometer seu uso em um cenário real. Ademais, a inputação de dados não gerou uma melhora perceptível acima de 5% nas métricas de F1 Score e Perda. Portanto o tratamento de nulos foi: manter as entradas como estão.</p>
           <p>As entradas da primeira coluna, referentes ao número de gestações tidas pela paciente</p>
           <p>O processo de "flip" (inversão binária) da classe de saída foi testada, e não gerou quaisquer resultados significativos. Portanto, a base foi mantida como original, tendo as saídas {0: Não tem diabetes, 1: Tem diabetes}.</p>
           <br>
@@ -153,7 +153,7 @@
       <div class="card-grid">
         <div class="card">
           <div class="text-container">
-            <li>Foi-se capaz de treinar modelos MLP através da ferramenta criada em Python capazes de prever a presença de diabetes em pacientes com base em dados de pacientes com diabetes e sem diabetes. O tratamento de nulos na base de dados foi um processo muito importante, ajudando a tirar o melhor proveito das entradas sem depender excessivamente da integridade dos dados, gerando modelos robustos. Constatou-se também que o "flip" binário de saída (trocando saídas de 1 por 0, e 0 por 1) NÃO gerou nenhum resultado significativamente diferente na qualidade de saída do modelo, contrário ao que foi discutido em sala.</li>
+            <li>Foi-se capaz de treinar modelos MLP através da ferramenta criada em Python, para prever a presença de diabetes com base em dados de pacientes com e sem diabetes. O tratamento de nulos na base de dados foi um processo muito exploratório importante, mas por fim, decidiu-se por manter as entradas nulas sem inputação afim de gerar um modelo robusto. Constatou-se também que o "flip" binário de saída (trocando saídas de 1 por 0, e 0 por 1) NÃO gerou nenhum resultado significativamente diferente na qualidade de saída do modelo, contrário ao que foi discutido em sala. Um "downsample" de 50% da base de dados foi utilizado para treinar o modelo final.</li>
             <br>
             <li>O modelo final foi treinado com uma base de dados reduzida em 50%, e obteve resultados satisfatórios em termos de precisão e recall. A matriz de confusão gerada pelo modelo final mostra que ele é capaz de identificar corretamente a presença de diabetes na maioria dos casos, ainda minimizando os falsos negativos. A sua capacidade de generalização é enorme, uma vez que ao validar este modelo contra a base de dados completa, suas métricas de F1 Score, Precision, Val Loss etc. mantiveram-se virtualmente idênticas, dentro de uma margem de variação calculada de ~3%.</li>
             <br>
