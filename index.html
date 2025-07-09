@@ -18,8 +18,8 @@
       <div class="logo">MLP Diabetes</div>
       <ul>
         <li><a href="#" data-template="overview-template">Visão Geral</a></li>
+        <li><a href="#" data-template="data-template">Discussão</a></li>
         <li><a href="#" data-template="code-template">Código</a></li>
-        <li><a href="#" data-template="data-template">Resultados</a></li>
         <li><a href="#" data-template="results-template">Conclusão</a></li>
       </ul>
     </div>
@@ -75,24 +75,67 @@
 
   <template id="data-template">
     <section id="data">
-      <h2>Resultados</h2>
+      <h2>Discussão</h2>
       <div class="card-grid">
         <div class="card">
-          <h3>Estatísticas</h3>
+          <h3>Abordagem</h3>
+          <h4>Base de Dados</h4>
+          <p>A base de dados utilizada foi pima.csv, contendo 768 instâncias de mulheres indígenas da etnia norteamericana Pima testadas por diabetes.</p>
+          <p>A base de dados contém 8 atributos e 1 classe binária.</p>
+          <p>A base também contém diversas entradas nulas, representadas pelo valor numérico 0, que NÃO foram tratadas no treinamento do modelo, propositalmente. Isto garantiu a robustez do modelo, uma vez que a inputação arbitrária de dados poderia comprometer seu uso em um cenário real. Ademais, a inputação de dados não gerou uma melhora perceptível acima de 5% nas métricas de F1 Score e Perda.</p>
+          <p>As entradas da primeira coluna, referentes ao número de gestações tidas pela paciente</p>
+          <p>O processo de "flip" (inversão binária) da classe de saída foi testada, e não gerou quaisquer resultados significativos. Portanto, a base foi mantida como original, tendo as saídas {0: Não tem diabetes, 1: Tem diabetes}.</p>
+          <br>
+          <h4>Modelo MLP</h4>
+          <p>As ênfases de desenvolvimento da rede MLP foram:</p>
+          <li>Minimização de Falsos Negativos.</li>
+          <li>Alta capacidade de generalização.</li>
+          <li>Baixo valor de perda.</li>
+          <br>
+          <h4>Código</h4>
+          <p>O modelo MLP foi treinado seguindo o código demonstrado na sessão de Código.</p>
+          <p>Foram utilizadas as bibliotecas: NumPy, Pandas, SciKitLearn e MatPlotLib</p>
+          <p>O código passou por múltiplas revisões e ajustes impossíveis de serem documentadas neste relatório. Entretanto, o histórico de commits pode ser conferido no <a href="https://github.com/gabrielmsilva00/Redes-Neurais-MLP/commits/main/">repositório do GitHub.</a></p>
+          <br>
+          <h3>Etapas</h3>
+          <h4>Fase 1</h4>
           <div class="image-container">
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <img src="docutils/content/low_fn.png" alt="Estatísticas dos Dados" style="width: 49%; height: auto; border-radius: 4px;">
-              <img src="docutils/content/low_fn2.png" alt="Estatísticas dos Dados" style="width: 49%; height: auto; border-radius: 4px;">
             </div>
+            <li>Figura 2: Melhor modelo em fase inicial obtido a partir de pima.csv</li>
             <br>
-            <li>Figura 2: Melhor modelo obtido a partir de pima.csv</li>
-            <li>Figura 3: Melhor modelo obtido a partir do conjunto (pima, pima-0n, pima-1n, pima-2n).csv</li>
+            <p>Na fase inicial de desenvolvimento, o modelo MLP foi treinado com o conjunto de dados pima.csv, focando em minimizar <b>Falsos Negativos.</b> Por razões médicas, esta métrica é a mais sensível, uma vez que classificar um paciente potencialmente diabético como não o sendo pode resultar em erros médicos graves.</p>
             <br>
             <p>Como podemos observar, a minimização agressiva de Falsos Negativos infere em uma redução da precisão do modelo como um todo. Isto prejudica a "correctividade" do modelo: o quão correto seu output é. Por causa disso, o modelo apresentado na Figura 2 foi descartado.</p>
             <br>
-            <p>Entretanto, a ferramenta permite que o usuário combine múltiplas instâncias da base de dados, como pode ser observado na Figura 3. Assim, a abordagem tomada foi de combinar repetidas entradas baseado na qualidade destas quanto à presença de nulos: quanto mais completa a entrada, maior a possibilidade desta estar repetida dentre as outras instâncias. A tolerância máxima permitida para repetição foi de 2 nulos por entrada.</p>
             <br>
-            <p>Ainda assim, a base completa foi utilizada, gerando um modelo que "conhece" todas as possibilidades apresentadas na coleta de dados real.</p>
+            <h4>Fase 2</h4>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <img src="docutils/content/low_fn2.png" alt="Estatísticas dos Dados" style="width: 49%; height: auto; border-radius: 4px;">
+              <img src="docutils/content/stacked.png" alt="Estatísticas dos Dados" style="width: 49%; height: auto; border-radius: 4px;">
+            </div>
+            <li>Figura 3: Melhor modelo obtido a partir do conjunto "stackado" (pima, pima-0n, pima-1n, pima-2n).csv</li>
+            <li>Figura 4: Matriz de Confusão gerada pela validação deste modelo contra a base de dados original (pima.csv)</li>
+            <br>
+            <p>Entretanto, a ferramenta permite que o usuário combine múltiplas instâncias da base de dados, como pode ser observado na Figura 3. Assim, a abordagem tomada na fase 2 foi de combinar repetidas entradas baseado na qualidade destas quanto à presença de nulos: quanto mais completa a entrada, maior a possibilidade desta estar repetida dentre as outras instâncias. A tolerância máxima permitida para repetição foi de 2 nulos por entrada.</p>
+            <br>
+            <p>Ainda assim, a base completa foi utilizada, gerando um modelo que "conhece" todas as possibilidades apresentadas na coleta de dados real. Mesmo com um Train/Test Split, a possibilidade de algumas folds treinadas passarem por um "overfitting" de entradas específicas era muito grande, e a capacidade de generalização foi posta em cheque, sendo pouco aferível.</p>
+            <br>
+            <br>
+            <h4>Fase 3</h4>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <img src="docutils/content/pima50.png" alt="Estatísticas dos Dados" style="width: 49%; height: auto; border-radius: 4px;">
+              <img src="docutils/content/pima50_all.png" alt="Estatísticas dos Dados" style="width: 49%; height: auto; border-radius: 4px;">
+            </div>
+            <li>Figura 4: Melhor modelo em fase 2 obtido a partir de pima-50.csv</li>
+            <li>Figura 5: O mesmo modelo validado contra a base de dados completa e original (pima.csv).</li>
+            <br>
+            <p>Em uma terceira e última fase, o modelo foi treinado com uma base de dados reduzida em 50% do número de entradas (aleatoriamente, arbitrariamente). Esta base de dados foi salva como pima-50.csv.</p>
+            <p>Utilizando as métricas de arquitetura dispostas nas Figuras 4 e 5, podemos notar os seguintes pontos no modelo obtido através desta abordagem:</p>
+            <li>A base de dados utilizada durante Treino/Teste foi pima-50.csv, que contém somente 50% das instâncias originais de pima.csv. Ademais, um Train/Test split de 50% foi utilizado. Então realisticamente, o modelo só "conhece" 25% da base de dados.</li>
+            <li>Ao validar este modelo contra a base de dados completa (pima.csv), a proporção gerada na matriz de confusão bem como as métricas de F1 Score, Precision, Recall etc. mantém-se virtualmente idêntica (dentro de uma margem de erro calculada de ~3%). Isto indica uma <b>ENORME capacidade de generalização.</b></li></li>
+            <p>Com isso, podemos concluir que o modelo obtido em fase 2 tem um grande potencial de generalização, minimizando falsos negativos dentro de qualquer conjunto de base de dados.</p>
           </div>
         </div>
       </div>
@@ -106,11 +149,11 @@
         <div class="card">
           <h3>Aprendizado</h3>
           <div class="text-container">
+            <br>
+            <li>Foi-se capaz de treinar modelos MLP através da ferramenta criada em Python capazes de prever a presença de diabetes em pacientes com base em dados de pacientes com diabetes e sem diabetes. O tratamento de nulos na base de dados foi um processo muito importante, ajudando a tirar o melhor proveito das entradas sem depender excessivamente da integridade dos dados, gerando modelos robustos. Constatou-se também que o "flip" binário de saída (trocando saídas de 1 por 0, e 0 por 1) NÃO gerou nenhum resultado significativamente diferente na qualidade de saída do modelo, contrário ao que foi discutido em sala.</li>
+            <li>O modelo final foi treinado com uma base de dados reduzida em 50%, e obteve resultados satisfatórios em termos de precisão e recall. A matriz de confusão gerada pelo modelo final mostra que ele é capaz de identificar corretamente a presença de diabetes na maioria dos casos, ainda minimizando os falsos negativos. A sua capacidade de generalização é enorme, uma vez que ao validar este modelo contra a base de dados completa, suas métricas de F1 Score, Precision, Val Loss etc. mantiveram-se virtualmente idênticas, dentro de uma margem de variação calculada de ~3%.</li>
+            <br>
             <li>O programa usou a biblioteca Scikit-learn (Python) que conta com uma robsuta documentação, similar ao MatPlotLib. O uso destas combinado com as bibliotecas NumPy e Pandas produziu uma ferramenta capaz e versátil, ainda que com espaço para muitas melhorias. Múltiplas abordagens e estratégias foram possibilitadas através desta ferramenta.</li>
-            <br>
-            <li>Foi-se capaz de treinar modelos MLP capazes de prever a presença de diabetes em pacientes com base em dados de pacientes com diabetes e sem diabetes. O tratamento de nulos na base de dados foi um processo muito importante, ajudando a tirar o melhor proveito das entradas sem depender excessivamente da integridade dos dados, gerando modelos robustos.</li>
-            <br>
-            <li>O modelo final foi treinado com uma base de dados combinada, contendo todas as instâncias disponíveis, e obteve resultados satisfatórios em termos de precisão e recall. A matriz de confusão gerada pelo modelo final mostra que ele é capaz de identificar corretamente a presença de diabetes na maioria dos casos, ainda minimizando os falsos negativos.</li>
             <br>
             <br>
             <p>Documentação das bibliotecas utilizadas:</p>
