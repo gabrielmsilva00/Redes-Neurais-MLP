@@ -77,7 +77,7 @@
     <section id="data">
       <h2>Discussão</h2>
       <div class="card-grid">
-        <div class="card">
+        <div class="text-container">
           <h3>Abordagem</h3>
           <h4>Base de Dados</h4>
           <p>A base de dados utilizada foi pima.csv, contendo 768 instâncias de mulheres indígenas da etnia norteamericana Pima testadas por diabetes.</p>
@@ -147,10 +147,9 @@
       <h2>Conclusão</h2>
       <div class="card-grid">
         <div class="card">
-          <h3>Aprendizado</h3>
           <div class="text-container">
-            <br>
             <li>Foi-se capaz de treinar modelos MLP através da ferramenta criada em Python capazes de prever a presença de diabetes em pacientes com base em dados de pacientes com diabetes e sem diabetes. O tratamento de nulos na base de dados foi um processo muito importante, ajudando a tirar o melhor proveito das entradas sem depender excessivamente da integridade dos dados, gerando modelos robustos. Constatou-se também que o "flip" binário de saída (trocando saídas de 1 por 0, e 0 por 1) NÃO gerou nenhum resultado significativamente diferente na qualidade de saída do modelo, contrário ao que foi discutido em sala.</li>
+            <br>
             <li>O modelo final foi treinado com uma base de dados reduzida em 50%, e obteve resultados satisfatórios em termos de precisão e recall. A matriz de confusão gerada pelo modelo final mostra que ele é capaz de identificar corretamente a presença de diabetes na maioria dos casos, ainda minimizando os falsos negativos. A sua capacidade de generalização é enorme, uma vez que ao validar este modelo contra a base de dados completa, suas métricas de F1 Score, Precision, Val Loss etc. mantiveram-se virtualmente idênticas, dentro de uma margem de variação calculada de ~3%.</li>
             <br>
             <li>O programa usou a biblioteca Scikit-learn (Python) que conta com uma robsuta documentação, similar ao MatPlotLib. O uso destas combinado com as bibliotecas NumPy e Pandas produziu uma ferramenta capaz e versátil, ainda que com espaço para muitas melhorias. Múltiplas abordagens e estratégias foram possibilitadas através desta ferramenta.</li>
