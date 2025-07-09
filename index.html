@@ -79,6 +79,7 @@
       <div class="card-grid">
         <div class="card">
           <h3>Abordagem</h3>
+          <div class="text-container">
           <h4>Base de Dados</h4>
           <p>A base de dados utilizada foi pima.csv, contendo 768 instâncias de mulheres indígenas da etnia norteamericana Pima testadas por diabetes.</p>
           <p>A base de dados contém 8 atributos e 1 classe binária.</p>
@@ -96,8 +97,10 @@
           <p>O modelo MLP foi treinado seguindo o código demonstrado na sessão de Código.</p>
           <p>Foram utilizadas as bibliotecas: NumPy, Pandas, SciKitLearn e MatPlotLib</p>
           <p>O código passou por múltiplas revisões e ajustes impossíveis de serem documentadas neste relatório. Entretanto, o histórico de commits pode ser conferido no <a href="https://github.com/gabrielmsilva00/Redes-Neurais-MLP/commits/main/">repositório do GitHub.</a></p>
+          </div>
           <br>
           <h3>Etapas</h3>
+          <div class="text-container">
           <h4>Fase 1</h4>
           <div class="image-container">
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -135,7 +138,9 @@
             <p>Utilizando as métricas de arquitetura dispostas nas Figuras 4 e 5, podemos notar os seguintes pontos no modelo obtido através desta abordagem:</p>
             <li>A base de dados utilizada durante Treino/Teste foi pima-50.csv, que contém somente 50% das instâncias originais de pima.csv. Ademais, um Train/Test split de 50% foi utilizado. Então realisticamente, o modelo só "conhece" 25% da base de dados.</li>
             <li>Ao validar este modelo contra a base de dados completa (pima.csv), a proporção gerada na matriz de confusão bem como as métricas de F1 Score, Precision, Recall etc. mantém-se virtualmente idêntica (dentro de uma margem de erro calculada de ~3%). Isto indica uma <b>ENORME capacidade de generalização.</b></li></li>
-            <p>Com isso, podemos concluir que o modelo obtido em fase 2 tem um grande potencial de generalização, minimizando falsos negativos dentro de qualquer conjunto de base de dados.</p>
+            <br>
+            <p>Com isso, podemos concluir que o modelo obtido na fase 3 tem um grande potencial de generalização, minimizando falsos negativos dentro de qualquer conjunto de base de dados e contendo boas métricas de F1 Score e Perda.</p>
+            </div>
           </div>
         </div>
       </div>
