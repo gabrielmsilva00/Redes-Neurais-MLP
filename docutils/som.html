@@ -35,41 +35,30 @@
         <div class="card">
           <h3>Descrição Geral</h3>
           <div class="text-container">
-            <h4>Relatório sobre o Modelo Kohonen</h4>
+            <h4>Modelo Kohonen em Treinamento Não Supervisionado</h4>
             <br>
             <p>
-              Este relatório tem como objetivo expor as investigações acerca do modelo Kohonen, visando encontrar a melhor classificação das amostras, além de analisar o comportamento do mapa auto-organizável em termos de clusterização e visualização de dados.
+              Este relatório tem como objetivo expor as investigações acerca do modelo Kohonen, visando encontrar a melhor classificação das amostras, além de analisar o comportamento do mapa auto-organizável em termos de visualização de dados.
               <br><br>
-              A base de dados utilizada é a Íris. Esta base possui informações sobre plantas do gênero Íris, onde podemos encontrar as variáveis, em ordem (FISHER, 1988):
-              <ul>
-                <li>comprimento da sépala</li>
-                <li>largura da sépala</li>
-                <li>comprimento da pétala</li>
-                <li>largura da pétala</li>
-                <li>classe</li>
-              </ul>
+              A base de dados utilizada contém informações sobre plantas do gênero Íris, onde encontramos as variáveis:
+              <li>comprimento da sépala</li>
+              <li>largura da sépala</li>
+              <li>comprimento da pétala</li>
+              <li>largura da pétala</li>
               <br>
-              Com a aplicação do modelo Kohonen, espera-se identificar agrupamentos que correspondam às diferentes espécies das plantas, evidenciando a quais classes cada amostra provavelmente pertence. 
-              <br><br>
-              É importante destacar que, neste caso, a acurácia não deve ser considerada como a principal métrica de avaliação. Embora modelos com alta acurácia possam parecer mais precisos, eles podem, na prática, agrupar amostras distintas em poucos clusters, desconsiderando a real diversidade de classes existentes nos dados.
-              <br>
-              Assim, modelos que conseguem representar de forma mais fiel à estrutura real dos dados (formando três grupos, como no caso desta base) podem apresentar uma acurácia aparentemente inferior. Por isso, torna-se essencial realizar a análise com gráficos comparativos, evidenciando aqueles que se aproximam mais da distribuição real das classes.
+              Com a aplicação do modelo Kohonen, espera-se identificar agrupamentos que correspondam às diferentes espécies das plantas, evidenciando, sem uma rotulação direta, a quais classes cada amostra provavelmente pertence.
             </p>
           </div>
         </div>
         <div class="card">
           <h3>Objetivos</h3>
           <div class="text-container">
-            <ul>
-              <li>Analisar os parâmetros do modelo Kohonen na base Íris.</li>
-              <li>Investigar a influência dos hiperparâmetros na separação das classes.</li>
-              <li>Comparar resultados visuais dos mapas gerados para diferentes configurações.</li>
-              <li>Avaliar a contribuição da técnica de hachura para interpretação dos mapas.</li>
-            </ul>
+            <li>Analisar os parâmetros do modelo Kohonen (SOM) que obtém um melhor resultado para a base Íris.</li>
+            <li>Comparar resultados visuais dos mapas gerados para diferentes configurações.</li>
+            <li>Contrastar os resultados obtidos contra a base de dados real e discutir possíveis disparidades.</li>
             <div class="image-container">
-              <!-- INSIRA AQUI A PRIMEIRA IMAGEM DO MAPA DE CLUSTERS -->
-              <img src="content/som_overview.png" alt="Mapa Inicial Kohonen" style="width: 100%; height: auto; border-radius: 4px;">
-              <small>Figura 1: Mapa Kohonen gerado na análise inicial (substitua pelo seu gráfico)</small>
+              <img src="content/kohonen.png" alt="Mapa Inicial Kohonen" style="width: 100%; height: auto; border-radius: 4px;">
+              <small>Figura 1: Funcionamento de um modelo de Kohonen. [Fonte: <a href="https://www.cin.ufpe.br/~lfsc/cursos/introducaoainteligenciaartificial/IA-Aula11-MapasAutoOrganizaveis.pdf">UFPE</a>]</small>
             </div>
           </div>
         </div>
@@ -97,20 +86,18 @@
           <h3>Hiperparâmetros</h3>
           <div class="text-container">
             <p>
-              Os hiperparâmetros correspondem às variáveis que definem a estrutura e o comportamento do processo de treinamento do modelo Kohonen (REIS, 2018). 
+              Os hiperparâmetros correspondem às variáveis que definem a estrutura e o comportamento do processo de treinamento do modelo Kohonen. 
               <br>
               Entre eles, destacam-se:
-              <ul>
-                <li>Número de linhas (m) e colunas (n) – definem o tamanho do grid SOM.</li>
-                <li>Taxa de aprendizado inicial (lr) – controla a velocidade da atualização dos pesos.</li>
-                <li>Número máximo de iterações (iters) – determina quantas vezes o modelo será ajustado.</li>
-                <li>Raio inicial da vizinhança (radius) – área de influência dos neurônios vizinhos.</li>
-                <li>Constante de tempo (tau) – regula o decaimento exponencial do raio ao longo do tempo.</li>
-                <li>Semente aleatória (rand) – garante reprodutibilidade.</li>
-              </ul>
+              <li>Número de linhas (m) e colunas (n) – definem o tamanho do SOM grid, também chamado de Topologia.</li>
+              <li>Taxa de aprendizado inicial (lr) – controla a velocidade da atualização dos pesos. A taxa de aprendizado decai ao longo do treinamento.</li>
+              <li>Número de iterações (iters) – determina quantas vezes o modelo será ajustado.</li>
+              <li>Raio inicial da vizinhança (radius) – área de influência dos neurônios vizinhos.</li>
+              <li>Chave aleatória (rand) – garante reprodutibilidade.</li>
               <br>
-              As investigações envolveram modificações na dimensão do grid, taxa de aprendizado, iterações e raio. Não foram realizadas alterações em tau e rand.
+              As investigações envolveram modificações na dimensão do grid, taxa de aprendizado, iterações e raio. Não foram realizadas alterações em tau (constante temporal), esta foi calculada automáticamente através da fórmula:
             </p>
+            <code style="display: block; text-align: center; margin: 0 auto; padding: 10px; border-radius: 4px; border: 1px solid #ccc;">n_iter / np.log(cfg.radius)</code>
             <h4>Configuração Inicial</h4>
             <p>
               O código foi executado a partir da configuração inicial para análise primária:<br>

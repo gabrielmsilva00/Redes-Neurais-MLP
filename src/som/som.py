@@ -1,5 +1,5 @@
 """
-Arquivo: som_v2.py
+Arquivo: som.py
 
 Implementação de um Mapa Auto-Organizável (Self-Organizing Map, SOM) voltado ao processamento e análise do conjunto
 de dados Iris. O objetivo central deste programa é demonstrar a aplicação do SOM para tarefas de visualização,
@@ -25,11 +25,11 @@ Como executar:
 -------------
 Dependências externas: NumPy, Pandas, MatPlotLib, SciKit-Learn, MiniSom, ucimlrepo
 Treinamento padrão (com o Iris embutido):
-    python som_v2.py
+    python som.py
 
 Para utilizar um dataset ou modelo diferente:
-    python som_v2.py -data=meuarquivo.zip -m=15 -key=42
-    python som_v2.py -load=./.som/som-model-2024-07-09_23-41-00-0.987.som -ng
+    python som.py -data=meuarquivo.zip -m=15 -key=42
+    python som.py -load=./.som/som-model-2024-07-09_23-41-00-0.987.som -ng
 
 Parâmetros configuráveis por flags:
 -----------------------------------
