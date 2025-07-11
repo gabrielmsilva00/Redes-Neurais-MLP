@@ -1,0 +1,9 @@
+2025-06-30 20:19:02,882 INFO ===== SESSION START =====: 
+2025-06-30 20:19:02,883 INFO OS: Windows-10-10.0.19045-SP0
+2025-06-30 20:19:02,883 INFO Python: 3.12.9 (tags/v3.12.9:fdb8142, Feb  4 2025, 15:27:58) [MSC v.1942 64 bit (AMD64)]
+2025-06-30 20:19:02,883 INFO Arch: AMD64
+2025-06-30 20:19:02,883 INFO Config: {'csv_dir': WindowsPath('.data'), 'log_dir': WindowsPath('.log'), 'img_dir': WindowsPath('.img'), 'mdl_dir': WindowsPath('.models'), 'cfg_dir': WindowsPath('.config'), 'csv_sep': ';', 'header': None, 'scramble_rows': True, 'normalize': True, 'null_value': 0, 'exclude_cols': (0,), 'fill_strategy': <FillStrategy.KEEP: 'constant'>}
+2025-06-30 20:19:02,883 INFO HyperParams: {'tt_split': 0.25, 'k_folds': 4, 'epochs': 1024, 'patience': 128, 'watch_for': (<BestBy.F1_SCORE: (7, 'max')>, <BestBy.RECALL: (10, 'max')>, <BestBy.DIFF_NEGATIVE: (6, 'max')>), 'learning_rate': 0.003, 'min_delta': 6e-06, 'activation': <Activation.TANH: 'tanh'>, 'layers': (8, 4, 2)}
+2025-06-30 20:19:45,402 INFO Auto-save figura Validação_Modelo_Completo_20250630_201945.png
+2025-06-30 20:19:45,452 INFO Tempo total 42.6s
+2025-06-30 20:19:45,453 INFO ===== SESSION END =====

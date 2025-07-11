@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Relatório de Treinamento MLP – Diabetes</title>
+  <link href="style.css" rel="stylesheet"/>
+  <link href="https://unpkg.com/prismjs@1.30.0/themes/prism-okaidia.min.css" rel="stylesheet"/>
+  <script src="https://unpkg.com/prismjs@1.30.0/components/prism-core.min.js" defer></script>
+  <script src="https://unpkg.com/prismjs@1.30.0/components/prism-python.min.js" defer></script>
+  <script src="https://unpkg.com/prismjs@1.30.0/plugins/file-highlight/prism-file-highlight.min.js" defer></script>
+  <script src="https://unpkg.com/prismjs@1.30.0/plugins/normalize-whitespace/prism-normalize-whitespace.min.js" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <nav>
+    <div class="container">
+      <ul>
+        <li><a href="..\index.html">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="margin-right: 1em; align-items: center; justify-content: center; display: flex;">
+          <path d="M4 11V20h16v-9M2 12l10-8 10 8" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+        <span style="color:var(--color-primary); font-weight: 700; font-size:1.1rem;"></span>
+        </a></li>
+      </ul>
+      <div class="logo">MLP - Diabetes</div>
+      <ul>
+        <li><a href="#" data-template="overview-template">Introdução</a></li>
+        <li><a href="#" data-template="data-template">Discussão</a></li>
+        <li><a href="#" data-template="code-template">Código</a></li>
+        <li><a href="#" data-template="results-template">Conclusão</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div id="main-content"></div>
+
+  <!-- Templates integrados -->
+  <template id="overview-template">
+    <section id="overview">
+      <h2>Introdução</h2>
+      <div class="card-grid">
+        <div class="card">
+          <h3>Descrição Geral</h3>
+          <div class="text-container">
+            <h4>Modelo MLP para Diagnóstico de Diabetes</h4>
+            <br>
+            <p>MLP é um tipo de arquitetura de rede neural que consiste em múltiplas camadas de neurônios, permitindo a modelagem de relações complexas entre as variáveis de entrada e a saída desejada. O treinamento foi realizado utilizando variadas técnicas possibilitadas através de uma ferramenta criada em Python, bem como algumas implementações únicas. Os modelos foram treinados com um conjunto de dados contendo informações médicas relevantes coletados de uma população de mulheres indígenas da etnia norteamericana Pima.</p>
+            <br>
+            <br>
+            <p>Este relatório inclui detalhes sobre a configuração do modelo, os dados utilizados, e as estatísticas descritivas das métricas de desempenho. O objetivo é fornecer uma visão abrangente do processo de desenvolvimento e avaliação do modelo MLP para diagnóstico de diabetes.</p>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Objetivos</h3>
+          <div class="text-container">
+            <ul>
+              <li>Desenvolver um ferramenta robusta capaz de treinar modelos MLP utilizando Scikit-learn (Python) para classificação binária.</li>
+              <li>Minimizar Falsos Negativos sem comprometer a Acurácia.</li>
+              <li>Avaliar e validar o desempenho do modelo treinado contra múltiplas instâncias da base de dados.</li>
+            </ul>
+            <div class="image-container">
+              <img src="content/cmatrix.png" alt="Matriz de Confusão" style="width: 100%; height: auto; border-radius: 4px;">
+              <small>Figura 1: Matriz de Confusão de Modelos MLP (classificação binária) [Fonte: <a href="https://www.researchgate.net/figure/Confusion-matrix-and-performance-evaluation-metrics_fig5_346062755">ResearchGate</a>]</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <template id="code-template">
+    <section id="code">
+      <h2>Código</h2>
+      <div class="card-grid">
+        <div class="card">
+          <h3>MLP.py</h3>
+            <pre data-src="src/mlp/mlp.py"></pre>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <template id="data-template">
+    <section id="data">
+      <h2>Discussão</h2>
+      <div class="card-grid">
+        <div class="card">
+          <h3>Abordagem</h3>
+          <div class="text-container">
+          <h4>Base de Dados</h4>
+          <p>A base de dados utilizada foi pima.csv, contendo 768 instâncias de mulheres indígenas da etnia norteamericana Pima testadas por diabetes.</p>
+          <p>A base de dados contém 8 atributos e 1 classe binária.</p>
+          <p>A base também contém diversas entradas nulas, representadas pelo valor numérico 0, que NÃO foram inputadas no treinamento do modelo, propositalmente. Isto garantiu a robustez do modelo, uma vez que a inputação arbitrária de dados poderia comprometer seu uso em um cenário real. Ademais, a inputação de dados não gerou uma melhora perceptível acima de 5% nas métricas de F1 Score e Perda. Portanto o tratamento de nulos foi: manter as entradas como estão.</p>
+          <p>As entradas da primeira coluna, referentes ao número de gestações tidas pela paciente</p>
+          <p>O processo de "flip" (inversão binária) da classe de saída foi testada, e não gerou quaisquer resultados significativos. Portanto, a base foi mantida como original, tendo as saídas {0: Não tem diabetes, 1: Tem diabetes}.</p>
+          <br>
+          <h4>Modelo MLP</h4>
+          <p>As ênfases de desenvolvimento da rede MLP foram:</p>
+          <li>Minimização de Falsos Negativos.</li>
+          <li>Alta capacidade de generalização.</li>
+          <li>Baixo valor de perda.</li>
+          <br>
+          <h4>Código</h4>
+          <p>O modelo MLP foi treinado seguindo o código demonstrado na sessão de Código.</p>
+          <p>Foram utilizadas as bibliotecas: NumPy, Pandas, SciKitLearn e MatPlotLib</p>
+          <p>O código passou por múltiplas revisões e ajustes impossíveis de serem documentadas neste relatório. Entretanto, o histórico de commits pode ser conferido no <a href="https://github.com/gabrielmsilva00/Redes-Neurais-MLP/commits/main/">repositório do GitHub.</a></p>
+          </div>
+          <br>
+          <h3>Etapas</h3>
+          <div class="text-container">
+          <h4>Fase 1</h4>
+          <div class="image-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1em;">
+              <img src="content/low_fn.png" alt="Estatísticas dos Dados" style="width: 49%; height: auto; border-radius: 4px;">
+            </div>
+            <li>Figura 2: Melhor modelo em fase inicial obtido a partir de pima.csv</li>
+            <br>
+            <p>Na fase inicial de desenvolvimento, o modelo MLP foi treinado com o conjunto de dados pima.csv, focando em minimizar <b>Falsos Negativos.</b> Por razões médicas, esta métrica é a mais sensível, uma vez que classificar um paciente potencialmente diabético como não o sendo pode resultar em erros médicos graves.</p>
+            <br>
+            <p>Como podemos observar, a minimização agressiva de Falsos Negativos infere em uma redução da precisão do modelo como um todo. Isto prejudica a "correctividade" do modelo: o quão correto seu output é. Por causa disso, o modelo apresentado na Figura 2 foi descartado.</p>
+            <br>
+            <br>
+            <h4>Fase 2</h4>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <img src="content/low_fn2.png" alt="Estatísticas dos Dados" style="width: 49%; height: auto; border-radius: 4px; margin-bottom: 1em;">
+              <img src="content/stacked.png" alt="Estatísticas dos Dados" style="width: 49%; height: auto; border-radius: 4px; margin-bottom: 1em;">
+            </div>
+            <li>Figura 3: Melhor modelo obtido a partir do conjunto "stackado" (pima, pima-0n, pima-1n, pima-2n).csv</li>
+            <li>Figura 4: Matriz de Confusão gerada pela validação deste modelo contra a base de dados original (pima.csv)</li>
+            <br>
+            <p>Entretanto, a ferramenta permite que o usuário combine múltiplas instâncias da base de dados, como pode ser observado na Figura 3. Assim, a abordagem tomada na fase 2 foi de combinar repetidas entradas baseado na qualidade destas quanto à presença de nulos: quanto mais completa a entrada, maior a possibilidade desta estar repetida dentre as outras instâncias. A tolerância máxima permitida para repetição foi de 2 nulos por entrada.</p>
+            <br>
+            <p>Ainda assim, a base completa foi utilizada, gerando um modelo que "conhece" todas as possibilidades apresentadas na coleta de dados real. Mesmo com um Train/Test Split, a possibilidade de algumas folds treinadas passarem por um "overfitting" de entradas específicas era muito grande, e a capacidade de generalização foi posta em cheque, sendo pouco aferível.</p>
+            <br>
+            <br>
+            <h4>Fase 3</h4>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <img src="content/pima50.png" alt="Estatísticas dos Dados" style="width: 49%; height: auto; border-radius: 4px; margin-bottom: 1em;">
+              <img src="content/pima50_all.png" alt="Estatísticas dos Dados" style="width: 49%; height: auto; border-radius: 4px; margin-bottom: 1em;">
+            </div>
+            <li>Figura 4: Melhor modelo em fase 2 obtido a partir de pima-50.csv</li>
+            <li>Figura 5: O mesmo modelo validado contra a base de dados completa e original (pima.csv).</li>
+            <br>
+            <p>Em uma terceira e última fase, o modelo foi treinado com uma base de dados reduzida em 50% do número de entradas (aleatoriamente, arbitrariamente). Esta base de dados foi salva como pima-50.csv.</p>
+            <p>Utilizando as métricas de arquitetura dispostas nas Figuras 4 e 5, podemos notar os seguintes pontos no modelo obtido através desta abordagem:</p>
+            <li>A base de dados utilizada durante Treino/Teste foi pima-50.csv, que contém somente 50% das instâncias originais de pima.csv. Ademais, um Train/Test split de 50% foi utilizado. Então realisticamente, o modelo só "conhece" 25% da base de dados.</li>
+            <li>Ao validar este modelo contra a base de dados completa (pima.csv), a proporção gerada na matriz de confusão bem como as métricas de F1 Score, Precision, Recall etc. mantém-se virtualmente idêntica (dentro de uma margem de erro calculada de ~3%). Isto indica uma <b>ENORME capacidade de generalização.</b></li></li>
+            <br>
+            <p>Com isso, podemos concluir que o modelo obtido na fase 3 tem um grande potencial de generalização, minimizando falsos negativos dentro de qualquer conjunto de base de dados e contendo boas métricas de F1 Score e Perda.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <template id="results-template">
+    <section id="results">
+      <h2>Conclusão</h2>
+      <div class="card-grid">
+        <div class="card">
+          <div class="text-container">
+            <li>Foi-se capaz de treinar modelos MLP através da ferramenta criada em Python, para prever a presença de diabetes com base em dados de pacientes com e sem diabetes. O tratamento de nulos na base de dados foi um processo muito exploratório importante, mas por fim, decidiu-se por manter as entradas nulas sem inputação afim de gerar um modelo robusto. Constatou-se também que o "flip" binário de saída (trocando saídas de 1 por 0, e 0 por 1) NÃO gerou nenhum resultado significativamente diferente na qualidade de saída do modelo, contrário ao que foi discutido em sala.</li>
+            <br>
+            <li>O modelo final foi treinado com um "downsample" de 50% da base de dados original, e obteve resultados satisfatórios em termos de precisão e recall. A matriz de confusão gerada pelo modelo final mostra que ele é capaz de identificar corretamente a presença de diabetes na maioria dos casos, ainda minimizando os falsos negativos. A sua capacidade de generalização é enorme, uma vez que ao validar este modelo contra a base de dados completa, suas métricas de F1 Score, Precision, Val Loss etc. mantiveram-se virtualmente idênticas, dentro de uma margem de variação calculada de ~3%.</li>
+            <br>
+            <li>O programa usou a biblioteca Scikit-learn (Python) que conta com uma robsuta documentação, similar ao MatPlotLib. O uso destas combinado com as bibliotecas NumPy e Pandas produziu uma ferramenta capaz e versátil, ainda que com espaço para muitas melhorias. Múltiplas abordagens e estratégias foram possibilitadas através desta ferramenta.</li>
+            <br>
+            <br>
+            <p>Documentação das bibliotecas utilizadas:</p>
+              <li><a href="https://scikit-learn.org/stable/index.html">Scikit-learn</a></li>
+              <li><a href="https://matplotlib.org/stable/index.html">Matplotlib</a></li>
+              <li><a href="https://numpy.org/doc/stable/">NumPy</a></li>
+              <li><a href="https://pandas.pydata.org/docs/">Pandas</a></li>
+            </p>
+            <br>
+            <p>LLMs utilizadas:
+              <li>GPT o3</li>
+              <li>GPT o4-mini</li>
+              <li>Claude 4 Opus</li>
+              <br>
+              O uso destas foi possibilitado através da plataforma <a href="https://www.getmerlin.in/chat">Merlin AI</a>, uma recomendação pessoal minha para o uso de LLMs em projetos de pesquisa.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </template>
+</body>
+<footer>
+  <p>© 2025 Gabriel Maia <a href="https://github.com/gabrielmsilva00">@GabrielMSilva00</a></p>
+</footer>
+</html>
