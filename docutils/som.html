@@ -15,25 +15,7 @@
 <body>
   <nav>
     <div class="container">
-      <a href="../index.html" style="
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: var(--color-background);
-        height: 1.5em;
-        width: 1.5em;
-        color: var(--color-primary);
-        font-weight: 700;
-        font-size: 1.5rem;
-        border: 2px solid var(--color-primary);
-        border-radius: 50px;
-        padding: 0.5em;
-        margin-right: 0.5em;
-        cursor: pointer;
-        text-decoration: none;
-      ">
-        ⤾
-      </a>
+      <a href="../index.html" style="display: flex; align-items: center; justify-content: center; background: var(--color-background); height: 1.5em; width: 1.5em; color: var(--color-primary); font-weight: 700; font-size: 1.5rem; border: 2px solid var(--color-primary); border-radius: 50px; padding: 0.5em; margin-right: 0.5em; cursor: pointer; text-decoration: none;">⤾</a>
       <div class="logo">SOM - Kohonen</div>
       <ul>
         <li><a href="#" data-template="overview-template">Introdução</a></li>
@@ -53,24 +35,41 @@
         <div class="card">
           <h3>Descrição Geral</h3>
           <div class="text-container">
-            <h4>Rede SOM para Organização de Dados e Visualização</h4>
+            <h4>Relatório sobre o Modelo Kohonen</h4>
             <br>
-            <p><strong>Placeholder:</strong> Descrição breve sobre o funcionamento das Self-Organizing Maps (SOM), arquitetura básica, aplicações típicas em análise de clusters, visualização de padrões complexos e redução de dimensionalidade. Explique de modo genérico como a rede Kohonen se diferencia das redes supervisionadas e sua utilidade prática.</p>
-            <br>
-            <p><strong>Placeholder:</strong> Este relatório apresenta as etapas genéricas do desenvolvimento e experimentação de uma SOM, destacando parâmetros como topologia, configuração, inicialização e tipos de dados manipulados. Detalhe que as experiências a seguir usam templates facilmente editáveis.</p>
+            <p>
+              Este relatório tem como objetivo expor as investigações acerca do modelo Kohonen, visando encontrar a melhor classificação das amostras, além de analisar o comportamento do mapa auto-organizável em termos de clusterização e visualização de dados.
+              <br><br>
+              A base de dados utilizada é a Íris. Esta base possui informações sobre plantas do gênero Íris, onde podemos encontrar as variáveis, em ordem (FISHER, 1988):
+              <ul>
+                <li>comprimento da sépala</li>
+                <li>largura da sépala</li>
+                <li>comprimento da pétala</li>
+                <li>largura da pétala</li>
+                <li>classe</li>
+              </ul>
+              <br>
+              Com a aplicação do modelo Kohonen, espera-se identificar agrupamentos que correspondam às diferentes espécies das plantas, evidenciando a quais classes cada amostra provavelmente pertence. 
+              <br><br>
+              É importante destacar que, neste caso, a acurácia não deve ser considerada como a principal métrica de avaliação. Embora modelos com alta acurácia possam parecer mais precisos, eles podem, na prática, agrupar amostras distintas em poucos clusters, desconsiderando a real diversidade de classes existentes nos dados.
+              <br>
+              Assim, modelos que conseguem representar de forma mais fiel à estrutura real dos dados (formando três grupos, como no caso desta base) podem apresentar uma acurácia aparentemente inferior. Por isso, torna-se essencial realizar a análise com gráficos comparativos, evidenciando aqueles que se aproximam mais da distribuição real das classes.
+            </p>
           </div>
         </div>
         <div class="card">
           <h3>Objetivos</h3>
           <div class="text-container">
             <ul>
-              <li><strong>Placeholder:</strong> Implementar e treinar uma rede SOM usando ferramenta em Python (Scikit-learn ou MiniSom).</li>
-              <li><strong>Placeholder:</strong> Realizar diferentes experimentos variando número de neurônios, formato do mapa e parâmetros de vizinhança.</li>
-              <li><strong>Placeholder:</strong> Visualizar clusters, padrões e distribuições usando Mapas de Kohonen e customizações gráficas.</li>
+              <li>Analisar os parâmetros do modelo Kohonen na base Íris.</li>
+              <li>Investigar a influência dos hiperparâmetros na separação das classes.</li>
+              <li>Comparar resultados visuais dos mapas gerados para diferentes configurações.</li>
+              <li>Avaliar a contribuição da técnica de hachura para interpretação dos mapas.</li>
             </ul>
             <div class="image-container">
-              <img src="content/som_placeholder.png" alt="Mapa de Clusters SOM" style="width: 100%; height: auto; border-radius: 4px;">
-              <small>Figura 1: <strong>Placeholder</strong> para visualização do Mapa SOM (substitua pelo seu gráfico de resultado)</small>
+              <!-- INSIRA AQUI A PRIMEIRA IMAGEM DO MAPA DE CLUSTERS -->
+              <img src="content/som_overview.png" alt="Mapa Inicial Kohonen" style="width: 100%; height: auto; border-radius: 4px;">
+              <small>Figura 1: Mapa Kohonen gerado na análise inicial (substitua pelo seu gráfico)</small>
             </div>
           </div>
         </div>
@@ -84,7 +83,7 @@
       <div class="card-grid">
         <div class="card">
           <h3>SOM.py</h3>
-          <pre data-src="../../src/som/som.py"></pre>
+          <pre data-src="https://raw.githubusercontent.com/gabrielmsilva00/Redes-Neurais-MLP/refs/heads/main/src/som/som.py"></pre>
         </div>
       </div>
     </section>
@@ -95,48 +94,84 @@
       <h2>Discussão</h2>
       <div class="card-grid">
         <div class="card">
-          <h3>Abordagem</h3>
+          <h3>Hiperparâmetros</h3>
           <div class="text-container">
-            <h4>Base de Dados</h4>
-            <p><strong>Placeholder:</strong> Indique qual base de dados foi usada (ex: wine.csv, iris.csv, ou sua própria base), número de instâncias, atributos e tipos de variáveis.</p>
-            <p><strong>Placeholder:</strong> Explique se houve normalização/standardização dos dados e como lidou com valores ausentes.</p>
-            <br>
-            <h4>Rede SOM</h4>
-            <li><strong>Placeholder:</strong> Discorra sobre os objetivos do ajuste de parâmetros da rede, como tamanho do grid (ex: 10x10), número de épocas, taxa de aprendizado e função de vizinhança.</li>
-            <li><strong>Placeholder:</strong> Relate experiências de inicialização randomizada, impactos do seed, e testes de diferentes topologias (hexagonal, retangular, etc).</li>
-            <br>
-            <h4>Código</h4>
-            <p><strong>Placeholder:</strong> O código utilizado está disponível na seção Código e pode ser facilmente substituído/adaptado. Recomenda-se o uso das bibliotecas MiniSom e Matplotlib para visualização.</p>
-            <p><strong>Placeholder:</strong> Documentação, histórico de experimentos e referências podem ser atualizados conforme as experiências reais realizadas.</p>
-          </div>
-          <br>
-          <h3>Etapas</h3>
-          <div class="text-container">
-            <h4>Fase 1</h4>
-            <div class="image-container">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1em;">
-                <img src="content/som_fase1_placeholder.png" alt="Mapa SOM Fase 1" style="width: 49%; height: auto; border-radius: 4px;">
-              </div>
-              <li>Figura 2: <strong>Placeholder</strong> para resultado inicial do treinamento SOM</li>
+            <p>
+              Os hiperparâmetros correspondem às variáveis que definem a estrutura e o comportamento do processo de treinamento do modelo Kohonen (REIS, 2018). 
               <br>
-              <p><strong>Placeholder:</strong> Comente o que foi testado nessa fase, resultados e visualizações geradas (ex: mapas U-Matrix, dispersão de clusters visíveis etc).</p>
-            </div>
-            <br>
-            <h4>Fase 2</h4>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <img src="content/som_fase2_placeholder.png" alt="Mapa SOM Fase 2" style="width: 49%; height: auto; border-radius: 4px; margin-bottom: 1em;">
-            </div>
-            <li>Figura 3: <strong>Placeholder</strong> para experimentos com novos hiperparâmetros</li>
-            <br>
-            <p><strong>Placeholder:</strong> Descreva rapidamente customizações realizadas e efeitos observados. Adicione detalhes dos ajustes nos hiperparâmetros e resultados notáveis.</p>
-            <br>
-            <h4>Fase 3</h4>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <img src="content/som_fase3_placeholder.png" alt="Mapa SOM Fase 3" style="width: 49%; height: auto; border-radius: 4px; margin-bottom: 1em;">
-            </div>
-            <li>Figura 4: <strong>Placeholder</strong> para validação final e generalização</li>
-            <br>
-            <p><strong>Placeholder:</strong> Relatório genérico sobre a generalização obtida, desafios remanescentes, limitações e oportunidades de experimentação futura.</p>
+              Entre eles, destacam-se:
+              <ul>
+                <li>Número de linhas (m) e colunas (n) – definem o tamanho do grid SOM.</li>
+                <li>Taxa de aprendizado inicial (lr) – controla a velocidade da atualização dos pesos.</li>
+                <li>Número máximo de iterações (iters) – determina quantas vezes o modelo será ajustado.</li>
+                <li>Raio inicial da vizinhança (radius) – área de influência dos neurônios vizinhos.</li>
+                <li>Constante de tempo (tau) – regula o decaimento exponencial do raio ao longo do tempo.</li>
+                <li>Semente aleatória (rand) – garante reprodutibilidade.</li>
+              </ul>
+              <br>
+              As investigações envolveram modificações na dimensão do grid, taxa de aprendizado, iterações e raio. Não foram realizadas alterações em tau e rand.
+            </p>
+            <h4>Configuração Inicial</h4>
+            <p>
+              O código foi executado a partir da configuração inicial para análise primária:<br>
+              <b>Randomizer Key:</b> 52<br>
+              Iterações: 20.000 | Topologia: 10x10 | Taxa de Aprendizado: 0.4 | Raio Inicial: 5.00 | Tau: 5112,47 | Melhor Acurácia: 0.833<br>
+              <br>
+              <b>Análise:</b> A classe Iris-setosa não foi corretamente agrupada—esta configuração não separou adequadamente as classes.<br>
+              <!-- SLOT IMAGEM CONFIGURAÇÃO INICIAL -->
+              <img src="content/som_config_inicial.png" alt="Mapa Configuração Inicial" style="width: 100%; height: auto; border-radius: 4px;">
+              <small>Figura 2: Mapa inicial (troque pelo seu gráfico inicial)</small>
+            </p>
+          </div>
+
+          <h3>Configurações sem Hachura</h3>
+          <div class="text-container">
+            <p>
+              Testes com diversos ajustes buscaram a melhor parametrização do modelo. Configurações sem hachura que obtiveram resultados satisfatórios estão descritas abaixo, considerando acurácia e qualidade do mapa. Um dos mapas com pior desempenho também está listado.
+            </p>
+            <h4>Configuração 1</h4>
+            <p>
+              <b>Chave Aleatória:</b> 65<br>
+              Iterações: 1.000 | Topologia: 5x5 | Taxa Aprendizado: 0.5 | Raio Inicial: 3.00 | Tau: 910,24 | Melhor Acurácia: 0.8333<br>
+              <img src="content/som_config1.png" alt="Mapa Configuração 1" style="width: 100%; height: auto; border-radius: 4px;">
+              <small>Figura 3: Mapa Configuração 1</small><br>
+              Separação de classes melhor que a original. A acurácia permaneceu em 83,3%.
+            </p>
+            <h4>Configuração 2</h4>
+            <p>
+              <b>Chave Aleatória:</b> 96<br>
+              Iterações: 30.000 | Topologia: 10x5 | Taxa Aprendizado: 0.5 | Raio Inicial: 2.50 | Tau: 32.740,70 | Melhor Acurácia: 0.967<br>
+              <img src="content/som_config2.png" alt="Mapa Configuração 2" style="width: 100%; height: auto; border-radius: 4px;">
+              <small>Figura 4: Mapa Configuração 2</small><br>
+              Observa-se destacamento de grupo e “vale” que separa neurônios. A alta acurácia (96,7%) indica divisão dos dados em só dois grupos principais, refletindo a sobreposição nas características de Iris-versicolor e Iris-setosa.
+            </p>
+            <h4>Configuração 3</h4>
+            <p>
+              <b>Chave Aleatória:</b> 87<br>
+              Iterações: 20.000 | Topologia: 8x4 | Taxa Aprendizado: 0.2 | Raio Inicial: 1.50 | Tau: 49.326,07 | Melhor Acurácia: 0.867<br>
+              <img src="content/som_config3.png" alt="Mapa Configuração 3" style="width: 100%; height: auto; border-radius: 4px;">
+              <small>Figura 5: Mapa Configuração 3</small><br>
+              Menor taxa de aprendizado e raio inicial resultaram numa separação parcial. A acurácia (86,7%) foi inferior e houve maior dificuldade do modelo em definir fronteiras entre classes adjacentes.
+            </p>
+            <h4>Configuração 4</h4>
+            <p>
+              <b>Chave Aleatória:</b> 36<br>
+              Iterações: 65.536 | Topologia: 8x8 | Taxa Aprendizado: 0.25 | Raio Inicial: 2.00 | Tau: 94.548,46 | Melhor Acurácia: 0.967<br>
+              <img src="content/som_config4.png" alt="Mapa Configuração 4" style="width: 100%; height: auto; border-radius: 4px;">
+              <small>Figura 6: Mapa Configuração 4</small><br>
+              Elevada acurácia (96,7%) e separação mais uniforme das classes. Aumentar iterações e grid melhora a representação topológica, reduzindo sobreposição entre espécies.
+            </p>
+          </div>
+          <h3>Configuração com Hachura</h3>
+          <div class="text-container">
+            <h4>Configuração 5 – Hachura</h4>
+            <p>
+              <b>Chave Aleatória:</b> 33<br>
+              Iterações: 65.536 | Topologia: 8x8 | Taxa Aprendizado: 0.25 | Raio Inicial: 2.00 | Tau: 94.548,46 | Melhor Acurácia: 0.967<br>
+              <img src="content/som_config5.png" alt="Mapa Configuração 5 com Hachura" style="width: 100%; height: auto; border-radius: 4px;">
+              <small>Figura 7: Mapa Configuração 5 com hachura</small><br>
+              Antes, regiões em branco nos mapas indicavam neurônios não ativados, dificultando a análise clara das zonas de ativação. A aplicação da **técnica de hachura** para marcar essas áreas permitiu identificar “vales” ou regiões sem ativação, facilitando a interpretação dos mapas supervisionado e não supervisionado.
+            </p>
           </div>
         </div>
       </div>
@@ -149,12 +184,24 @@
       <div class="card-grid">
         <div class="card">
           <div class="text-container">
-            <li><strong>Placeholder:</strong> Modelo SOM treinado com diferentes configurações. Comentários genéricos sobre desempenho e robustez do modelo para visualização e clustering.</li>
+            <li>
+              Conclui-se que a configuração 5, contendo a técnica de hachura para destaque de neurônios não ativados, apresentou melhor desempenho e maior clareza visual dos resultados. 
+              Os testes evidenciaram a importância do ajuste de hiperparâmetros, sendo que grids maiores e mais iterações aprimoram a separação das classes.
+            </li>
             <br>
-            <li><strong>Placeholder:</strong> Pontos a aprimorar e possíveis estratégias para melhor generalização e estabilidade dos resultados.</li>
+            <li>
+              A técnica de hachura facilitou uma análise mais precisa das regiões de ativação e ajudou a evitar interpretações errôneas causadas pelos neurônios não ativados.
+            </li>
             <br>
-            <li><strong>Placeholder:</strong> Referências das bibliotecas usadas: MiniSom, Scikit-learn, Matplotlib, e links para documentação oficial.</li>
+            <li>
+              O modelo Kohonen, aliado a uma análise crítica dos mapas gerados, evidenciou os limites da acurácia como métrica isolada, destacando a relevância de visualizações claras de clusterização para compreender a estrutura dos dados.
+            </li>
             <br>
+            <p><strong>Referências:</strong><br>
+              FISHER, Ronald. Iris. <a href="https://archive.ics.uci.edu/dataset/53/iris">https://archive.ics.uci.edu/dataset/53/iris</a>.<br>
+              KLÖSGEN, Willi; MAY, Michael. <a href="https://doi.org/10.1007/3-540-45681-3_23">Spatial subgroup mining integrated in an object-relational spatial database</a>. Springer, 2002.<br>
+              REIS, Carlos. <a href="https://carlos-henreis.github.io/files/Monografia_TFG.pdf">Otimização de Hiperparâmetros em Redes Neurais Profundas</a>, UNIFEI, 2018.
+            </p>
             <br>
             <p>
               <strong>Documentação das bibliotecas sugeridas:</strong><br>
@@ -164,17 +211,13 @@
             </p>
             <br>
             <p>
-              <strong>LLMs utilizadas:</strong><br>
-              <li><strong>Placeholder:</strong> Liste aqui as ferramentas e LLMs usadas, se for o caso.</li>
-              <br>
-              Sinta-se à vontade para customizar este texto conforme seu resultado final.
+              <strong>Código-fonte utilizado disponível na seção Código.</strong>
             </p>
           </div>
         </div>
       </div>
     </section>
   </template>
-
 </body>
 <footer>
   <p>Este website está disponível no repositório do <a href="https://github.com/gabrielmsilva00/Redes-Neurais-MLP">GitHub</a></p>
