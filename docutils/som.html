@@ -118,9 +118,9 @@
             <div class="text-container">
             <h4>Fase 1</h4>
             <p>
-              &emsp;&emsp;O código foi executado a partir da configuração inicial para análise primária:<br>
+              &emsp;&emsp;O código foi executado a partir da configuração inicial para análise primária:<br><br>
               <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto; align-items: center;">
-                <img src="content/som_fase1.jpeg" alt="Mapa Configuração Inicial" style="width: 100%; height: auto; border-radius: 4px;">
+                <img src="content/som_fase1_c1.png" alt="Mapa Configuração Inicial" style="width: 100%; height: auto; border-radius: 4px;">
                 <pre style="display: block; margin: 0 auto; padding: 1em; border-radius: 0.5em; border: 1px solid #666; font-size: 0.85em;">
 --------------------------------
 [SOM - Log de Informações]
@@ -134,45 +134,97 @@ Melhor Acurácia         : 0.800
 Sistema Operacional     : Windows 10.0.19045
 Python                  : 3.12.9
 --------------------------------</pre>
-                <small style="grid-column: 1; grid-row: 2; text-align: center;">Figura 2: Mapa Configuração Inicial</small>
+                <small style="grid-column: 1; grid-row: 2; text-align: center;">Figura 2: Mapa Gerado pela Configuração 1</small>
               </div>
             </p>
             <br>
             <h4>Fase 2</h4>
             <p>
-              &emsp;&emsp;Testes com diversos ajustes buscaram a melhor parametrização do modelo. Algumas configurações sem hachura que obtiveram resultados satisfatórios estão descritas abaixo, considerando acurácia e qualidade do mapa. Um dos mapas com pior desempenho também está listado.
+              &emsp;&emsp;Testes com diversos ajustes buscaram a melhor parametrização do modelo. Algumas configurações obtiveram resultados satisfatórios estão descritas abaixo, considerando acurácia e qualidade do mapa. Um dos mapas com pior desempenho também está listado.
             </p>
             <h4>Configuração 1</h4>
             <p>
-              <b>Chave Aleatória:</b> 65<br>
-              Iterações: 1.000 | Topologia: 5x5 | Taxa Aprendizado: 0.5 | Raio Inicial: 3.00 | Tau: 910,24 | Melhor Acurácia: 0.8333<br>
-              <img src="content/som_config1.png" alt="Mapa Configuração 1" style="width: 100%; height: auto; border-radius: 4px;">
-              <small>Figura 3: Mapa Configuração 1</small><br>
-              Separação de classes melhor que a original. A acurácia permaneceu em 83,3%.
+              &emsp;&emsp;Separação de classes melhor que a original. A acurácia permaneceu em 83,3%.
+              <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto; align-items: center;">
+                <img src="content/som_fase2_c1.png" alt="Mapa Configuração Inicial" style="width: 100%; height: auto; border-radius: 4px;">
+                <pre style="display: block; margin: 0 auto; padding: 1em; border-radius: 0.5em; border: 1px solid #666; font-size: 0.85em;">
+--------------------------------
+[SOM - Log de Informações]
+Chave Aleatória         : 65
+Iterações               : 1000
+Topologia               : 5 x 5
+Taxa de Aprendizado     : 0.5
+Raio Inicial (Sigma)    : 3.00
+Tau                     : 910.24
+Melhor Acurácia         : 0.8333
+Sistema Operacional     : Windows 10.0.19045
+Python                  : 3.12.9
+--------------------------------</pre>
+                <small style="grid-column: 1; grid-row: 2; text-align: center;">Figura 3: Mapa Gerado pela Configuração 1</small>
+              </div>
             </p>
             <h4>Configuração 2</h4>
             <p>
-              <b>Chave Aleatória:</b> 96<br>
-              Iterações: 30.000 | Topologia: 10x5 | Taxa Aprendizado: 0.5 | Raio Inicial: 2.50 | Tau: 32.740,70 | Melhor Acurácia: 0.967<br>
-              <img src="content/som_config2.png" alt="Mapa Configuração 2" style="width: 100%; height: auto; border-radius: 4px;">
-              <small>Figura 4: Mapa Configuração 2</small><br>
-              Observa-se destacamento de grupo e “vale” que separa neurônios. A alta acurácia (96,7%) indica divisão dos dados em só dois grupos principais, refletindo a sobreposição nas características de Iris-versicolor e Iris-setosa.
+              &emsp;&emsp;Utilizando-se de uma topologia retangular 10 x 5, observa-se um melhor destacamento de grupos e do “vale” que separa neurônios. A alta acurácia (96,7%) indica divisão dos dados em só dois grupos principais, refletindo uma sobreposição nas características (atributos) de Iris-versicolor e Iris-setosa.
+              <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto; align-items: center;">
+                <img src="content/som_fase2_c2.png" alt="Mapa Configuração Inicial" style="width: 100%; height: auto; border-radius: 4px;">
+                <pre style="display: block; margin: 0 auto; padding: 1em; border-radius: 0.5em; border: 1px solid #666; font-size: 0.85em;">
+--------------------------------
+[SOM - Log de Informações]
+Chave Aleatória         : 96
+Iterações               : 30000
+Topologia               : 10 x 5
+Taxa de Aprendizado     : 0.5
+Raio Inicial (Sigma)    : 2.50
+Tau                     : 32740.70
+Melhor Acurácia         : 0.967
+Sistema Operacional     : Linux #1 SMP PREEMPT Tue Jun 3 14:32:57 UTC 2025
+Python                  : 3.12.11
+--------------------------------</pre>
+                <small style="grid-column: 1; grid-row: 2; text-align: center;">Figura 4: Mapa Gerado pela Configuração 2</small>
+              </div>
             </p>
             <h4>Configuração 3</h4>
             <p>
-              <b>Chave Aleatória:</b> 87<br>
-              Iterações: 20.000 | Topologia: 8x4 | Taxa Aprendizado: 0.2 | Raio Inicial: 1.50 | Tau: 49.326,07 | Melhor Acurácia: 0.867<br>
-              <img src="content/som_config3.png" alt="Mapa Configuração 3" style="width: 100%; height: auto; border-radius: 4px;">
-              <small>Figura 5: Mapa Configuração 3</small><br>
-              Menor taxa de aprendizado e raio inicial resultaram numa separação parcial. A acurácia (86,7%) foi inferior e houve maior dificuldade do modelo em definir fronteiras entre classes adjacentes.
+              &emsp;&emsp;Menor taxa de aprendizado e raio inicial resultaram numa separação parcial. A acurácia (86,7%) foi inferior e houve maior dificuldade em definir fronteiras entre atributos.
+              <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto; align-items: center;">
+                <img src="content/som_fase2_c3.png" alt="Mapa Configuração Inicial" style="width: 100%; height: auto; border-radius: 4px;">
+                <pre style="display: block; margin: 0 auto; padding: 1em; border-radius: 0.5em; border: 1px solid #666; font-size: 0.85em;">
+--------------------------------
+[SOM - Log de Informações]
+Chave Aleatória         : 87
+Iterações               : 20000
+Topologia               : 8 x 4
+Taxa de Aprendizado     : 0.2
+Raio Inicial (Sigma)    : 1.50
+Tau                     : 49326.07
+Melhor Acurácia         : 0.867
+Sistema Operacional     : Linux #1 SMP PREEMPT Tue Jun 3 14:32:57 UTC 2025
+Python                  : 3.12.11
+--------------------------------</pre>
+                <small style="grid-column: 1; grid-row: 2; text-align: center;">Figura 5: Mapa Gerado pela Configuração 3</small>
+              </div>
             </p>
             <h4>Configuração 4</h4>
             <p>
-              <b>Chave Aleatória:</b> 36<br>
-              Iterações: 65.536 | Topologia: 8x8 | Taxa Aprendizado: 0.25 | Raio Inicial: 2.00 | Tau: 94.548,46 | Melhor Acurácia: 0.967<br>
-              <img src="content/som_config4.png" alt="Mapa Configuração 4" style="width: 100%; height: auto; border-radius: 4px;">
-              <small>Figura 6: Mapa Configuração 4</small><br>
-              Elevada acurácia (96,7%) e separação mais uniforme das classes. Aumentar iterações e grid melhora a representação topológica, reduzindo sobreposição entre espécies.
+              &emsp;&emsp;Elevada acurácia (96,7%) e separação mais uniforme dos neurônios ativados (BMUs) em 2 grupos, indicando um possível 3º grupo. Aumentar iterações por vezes melhora a representação topológica, reduzindo sobreposições e aumentando a qualidade do mapa.
+              <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto; align-items: center;">
+                <img src="content/som_fase2_c4.png" alt="Mapa Configuração Inicial" style="width: 100%; height: auto; border-radius: 4px;">
+                <pre style="display: block; margin: 0 auto; padding: 1em; border-radius: 0.5em; border: 1px solid #666; font-size: 0.85em;">
+--------------------------------
+[SOM - Log de Informações]
+Chave Aleatória         : 36
+Iterações               : 65536
+Topologia               : 8 x 8
+Taxa de Aprendizado     : 0.25
+Raio Inicial (Sigma)    : 2.00
+Tau                     : 94548.46
+Melhor Acurácia         : 0.967
+Sistema Operacional     : Linux #1 SMP PREEMPT Tue Jun 3 14:32:57 UTC 2025
+Python                  : 3.12.11
+--------------------------------</pre>
+                <small style="grid-column: 1; grid-row: 2; text-align: center;">Figura 5: Mapa Gerado pela Configuração 4</small>
+              </div>
             </p>
           </div>
           <h3>Configuração com Hachura</h3>

@@ -284,7 +284,7 @@ def plot_label_maps(
   save_path: Optional[str] = None,
   show: bool = True
 ) -> None:
-  fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
+  fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
   unl_max: float = float(unlab_map.max()) if np.any(unlab_map) else 1.0
 
   n_shades: int = int(unl_max) + 1
@@ -296,7 +296,7 @@ def plot_label_maps(
   bmu_cmap = ListedColormap(colors)
 
   im1 = ax1.imshow(unlab_map, cmap=bmu_cmap, vmin=0, vmax=unl_max)
-  ax1.set_title("Unsupervised: BMU Hit Count")
+  ax1.set_title("Não Rotulado: BMU por Frequência")
   fig.colorbar(im1, ax=ax1, shrink=0.7, pad=0.02, ticks=ticks)
   ax1.set_xlabel("SOM X")
   ax1.set_ylabel("SOM Y")
@@ -321,7 +321,7 @@ def plot_label_maps(
   plot_map = np.where(int_map == -1, 0, int_map + 1)
 
   im2 = ax2.imshow(plot_map, cmap=sup_cmap, vmin=0, vmax=sup_cmap.N - 1)
-  ax2.set_title("SOM Supervisionado: Classes")
+  ax2.set_title("Rotulado: BMU por Classe")
   ax2.set_xlabel("SOM X")
   ax2.set_ylabel("SOM Y")
   ax2.set_xticks(np.arange(cfg.n))

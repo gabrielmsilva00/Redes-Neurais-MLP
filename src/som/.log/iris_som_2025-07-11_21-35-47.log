@@ -1,0 +1,14 @@
+--------------------------------
+[SOM - Log de Informações]
+Chave Aleatória         : 52
+Iterações               : 20000
+Topologia               : 10 x 10
+Taxa de Aprendizado     : 0.4
+Raio Inicial (Sigma)    : 5.00
+Tau                     : 12426.70
+Melhor Acurácia         : 0.833
+Sistema Operacional     : Windows 10.0.19045
+Python                  : 3.12.9
+--------------------------------
+Figura salva em: .png\som_2025-07-11_21-35-47.png
+Modelo salvo em: .som\som-model-2025-07-11_21-35-47-0.833.som
