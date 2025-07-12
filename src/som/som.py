@@ -105,11 +105,11 @@ from matplotlib.colors        import ListedColormap, BoundaryNorm
 @dataclass(frozen=True, slots=True)
 class Config:
   iters:  int             = 2**16 # n_iterations;   Sugestões: 1000, 5000, 10000, 30000, 50000
-  n:      int             = 8     # map_size;       Sugestões: 5, 10, 15
-  m:      int             = 8     # map_size;       Sugestões: 5, 10, 15
-  lr:     float           = 0.25  # learning_rate;  Sugestões: 0.5, 0.1, 0.01
-  radius: Optional[float] = 2.0   # sigma_0;        Sugestões: 3, 5, 7 (Pode ser computado automaticamente)
-  rand:   Optional[int]   = 00    # random_seed
+  n:      int             = 10     # map_size;       Sugestões: 5, 10, 15
+  m:      int             = 10     # map_size;       Sugestões: 5, 10, 15
+  lr:     float           = 0.4  # learning_rate;  Sugestões: 0.5, 0.1, 0.01
+  radius: Optional[float] = 5.0   # sigma_0;        Sugestões: 3, 5, 7 (Pode ser computado automaticamente)
+  rand:   Optional[int]   = 52    # random_seed
 
   @staticmethod
   def from_args(args: dict[str, Any]) -> 'Config':
