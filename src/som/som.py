@@ -19,7 +19,8 @@ Funcionalidades-chave:
 ===============================================================================================
 Informações:
 -----------------------------------------------------------------------------------------------
-Autores: Gabriel Maia
+Autores: Gabriel Maia (@gabrielmsilva00)
+Graduando em Engenharia Elétrica pela Universidade Estadual do Rio de Janeiro (UERJ), Brasil, 2025.
 
 Como executar:
 -------------
@@ -100,15 +101,15 @@ from sklearn.metrics          import accuracy_score
 from ucimlrepo                import fetch_ucirepo
 from matplotlib.colors        import ListedColormap, BoundaryNorm
 
-# ===== CONFIG & DIRS =====
+# ===== CONFIGS =====
 @dataclass(frozen=True, slots=True)
 class Config:
   iters:  int             = 2**16 # n_iterations;   Sugestões: 1000, 5000, 10000, 30000, 50000
   n:      int             = 8     # map_size;       Sugestões: 5, 10, 15
-  m:      int             = 8    # map_size;       Sugestões: 5, 10, 15
+  m:      int             = 8     # map_size;       Sugestões: 5, 10, 15
   lr:     float           = 0.25  # learning_rate;  Sugestões: 0.5, 0.1, 0.01
   radius: Optional[float] = 2.0   # sigma_0;        Sugestões: 3, 5, 7 (Pode ser computado automaticamente)
-  rand:   Optional[int]   = 33    # random_seed
+  rand:   Optional[int]   = 00    # random_seed
 
   @staticmethod
   def from_args(args: dict[str, Any]) -> 'Config':
@@ -123,7 +124,7 @@ LOG_DIR   = ".log"
 MODEL_DIR = ".som"
 PNG_DIR   = ".png"
 
-# ===== ARGS & LOGGING =====
+# ===== ARGS =====
 def parse_args(argv: list[str]) -> dict[str, Any]:
   cli = {}
   for arg in argv[1:]:
@@ -171,7 +172,7 @@ class DualLogger:
   def close(self):
     self.log_file.close()
 
-# ===== DATA INGEST =====
+# ===== DADOS =====
 def fetch_iris(data_path: Optional[str]=None) -> Tuple[pd.DataFrame, pd.Series]:
   if data_path:
     if data_path.endswith('.zip'):
@@ -192,7 +193,7 @@ def choose_random_key(key: Optional[int]) -> int:
   print(f"[Chave Aleatória gerada: {val}]")
   return val
 
-# ===== SOM TRAINING & MAPPINGS =====
+# ===== SOM =====
 def train_som(X: np.ndarray, cfg: Config) -> MiniSom:
   som = MiniSom(
     x=cfg.m, y=cfg.n, input_len=X.shape[1], sigma=cfg.radius,
@@ -270,7 +271,7 @@ def predict_labels(
     preds.append(label if label is not None else fallback)
   return np.array(preds, dtype=object)
 
-# ===== PLOTTING SECTION =====
+# ===== PLOTTING =====
 def to_rgba(arr: np.ndarray) -> np.ndarray:
   if arr.shape[-1] == 4:
     return arr
@@ -316,7 +317,7 @@ def plot_label_maps(
   base_cmap = plt.get_cmap("tab10")
   class_colors = np.take(np.asarray(base_cmap.colors), list(range(len(class_set))), axis=0)
   class_colors_rgba = to_rgba(np.asarray(class_colors))
-  sup_colors = np.vstack((light_grey, class_colors_rgba))  # 0: grey, 1+: classes
+  sup_colors = np.vstack((light_grey, class_colors_rgba))
   sup_cmap = ListedColormap(sup_colors)
   plot_map = np.where(int_map == -1, 0, int_map + 1)
 
@@ -351,7 +352,7 @@ def plot_label_maps(
     plt.show()
   plt.close(fig)
 
-# ===== METRICS/DUMP =====
+# ===== MÉTRICAS =====
 def print_diagnostics(
   *, cfg: Config, acc: float, n_iter: int,
   log_path: str, os_name: str, os_version: str, python_version: str
@@ -369,7 +370,7 @@ def print_diagnostics(
   print(f"Python                  : {python_version}")
   print("-" * 32)
 
-# ===== MODEL LOAD =====
+# ===== MODELO =====
 def find_latest_model(model_dir: str) -> Optional[str]:
   candidates = sorted(
     glob.glob(os.path.join(model_dir, "som-model-*.som")),
