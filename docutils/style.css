@@ -87,14 +87,6 @@ section h2 {
   margin-bottom: var(--spacing-unit);
   color: var(--color-secondary);
 }
-code {
-  background-color: var(--color-surface);
-  color: var(--color-on-surface);
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-family: var(--font-family);
-  font-size: 0.875rem;
-}
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));

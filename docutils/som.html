@@ -38,15 +38,16 @@
             <h4>Modelo Kohonen em Treinamento Não Supervisionado</h4>
             <br>
             <p>
-              Este relatório tem como objetivo expor as investigações acerca do modelo Kohonen, visando encontrar a melhor classificação das amostras, além de analisar o comportamento do mapa auto-organizável em termos de visualização de dados.
+              &emsp;&emsp;Este relatório tem como objetivo expor as investigações acerca do modelo Kohonen, também conhecido como SOM (Self-Organizing Map), com o objetivo de encontrar a melhor classificação das amostras, além de analisar o comportamento do mapa auto-organizável em termos de visualização de dados.
               <br><br>
-              A base de dados utilizada contém informações sobre plantas do gênero Íris, onde encontramos as variáveis:
+              &emsp;&emsp;A base de dados utilizada contém informações sobre plantas do gênero Íris, onde encontramos as variáveis:
+              <br><br>
               <li>comprimento da sépala</li>
               <li>largura da sépala</li>
               <li>comprimento da pétala</li>
               <li>largura da pétala</li>
               <br>
-              Com a aplicação do modelo Kohonen, espera-se identificar agrupamentos que correspondam às diferentes espécies das plantas, evidenciando, sem uma rotulação direta, a quais classes cada amostra provavelmente pertence.
+              &emsp;&emsp;Com a aplicação do modelo Kohonen, espera-se identificar agrupamentos que correspondam às diferentes espécies das plantas, evidenciando, sem uma rotulação direta, a quais classes cada amostra provavelmente pertence.
             </p>
           </div>
         </div>
@@ -83,38 +84,52 @@
       <h2>Discussão</h2>
       <div class="card-grid">
         <div class="card">
-          <h3>Hiperparâmetros</h3>
+          <h3>Abordagem</h3>
           <div class="text-container">
+            <h4>Hiperparâmetros</h4>
             <p>
-              Os hiperparâmetros correspondem às variáveis que definem a estrutura e o comportamento do processo de treinamento do modelo Kohonen. 
+              &emsp;&emsp;Os hiperparâmetros correspondem às variáveis que definem a estrutura e o comportamento do processo de treinamento do modelo Kohonen. 
               <br>
-              Entre eles, destacam-se:
-              <li>Número de linhas (m) e colunas (n) – definem o tamanho do SOM grid, também chamado de Topologia.</li>
-              <li>Taxa de aprendizado inicial (lr) – controla a velocidade da atualização dos pesos. A taxa de aprendizado decai ao longo do treinamento.</li>
-              <li>Número de iterações (iters) – determina quantas vezes o modelo será ajustado.</li>
-              <li>Raio inicial da vizinhança (radius) – área de influência dos neurônios vizinhos.</li>
-              <li>Chave aleatória (rand) – garante reprodutibilidade.</li>
+              &emsp;&emsp;Entre eles, destacam-se:
+              <li>Número de linhas (m) e colunas (n) - definem o tamanho do SOM grid, também chamado de Topologia.</li>
+              <li>Taxa de aprendizado inicial (lr) - controla a velocidade da atualização dos pesos. A taxa de aprendizado decai ao longo do treinamento.</li>
+              <li>Número de iterações (iters) - determina quantas vezes o modelo será ajustado.</li>
+              <li>Raio inicial da vizinhança (radius) - Área de influência dos neurônios vizinhos.</li>
+              <li>Chave aleatória (rand) - garante reprodutibilidade dos resultados.</li>
               <br>
-              As investigações envolveram modificações na dimensão do grid, taxa de aprendizado, iterações e raio. Não foram realizadas alterações em tau (constante temporal), esta foi calculada automáticamente através da fórmula:
+              &emsp;&emsp;As investigações envolveram modificações diretas destes hiperparâmetros ao longo de inúmeras execuções do código. Não foram realizadas alterações em tau (constante temporal), esta foi calculada automáticamente através da fórmula:
             </p>
-            <code style="display: block; text-align: center; margin: 0 auto; padding: 10px; border-radius: 4px; border: 1px solid #ccc;">n_iter / np.log(cfg.radius)</code>
-            <h4>Configuração Inicial</h4>
-            <p>
-              O código foi executado a partir da configuração inicial para análise primária:<br>
-              <b>Randomizer Key:</b> 52<br>
-              Iterações: 20.000 | Topologia: 10x10 | Taxa de Aprendizado: 0.4 | Raio Inicial: 5.00 | Tau: 5112,47 | Melhor Acurácia: 0.833<br>
-              <br>
-              <b>Análise:</b> A classe Iris-setosa não foi corretamente agrupada—esta configuração não separou adequadamente as classes.<br>
-              <!-- SLOT IMAGEM CONFIGURAÇÃO INICIAL -->
-              <img src="content/som_config_inicial.png" alt="Mapa Configuração Inicial" style="width: 100%; height: auto; border-radius: 4px;">
-              <small>Figura 2: Mapa inicial (troque pelo seu gráfico inicial)</small>
-            </p>
+            <br>
+            <code style="display: block; text-align: center; margin: 0 auto; padding: 1em; border-radius: 0.5em; border: 1px solid #666; font-size: 0.85em;">n_iter / np.log(cfg.radius)</code>
           </div>
-
-          <h3>Configurações sem Hachura</h3>
-          <div class="text-container">
+            <br>
+            <h3>Etapas</h3>
+            <div class="text-container">
+            <h4>Fase 1</h4>
             <p>
-              Testes com diversos ajustes buscaram a melhor parametrização do modelo. Configurações sem hachura que obtiveram resultados satisfatórios estão descritas abaixo, considerando acurácia e qualidade do mapa. Um dos mapas com pior desempenho também está listado.
+              &emsp;&emsp;O código foi executado a partir da configuração inicial para análise primária:<br>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto; align-items: center;">
+                <img src="content/som_fase1.jpeg" alt="Mapa Configuração Inicial" style="width: 100%; height: auto; border-radius: 4px;">
+                <pre style="display: block; margin: 0 auto; padding: 1em; border-radius: 0.5em; border: 1px solid #666; font-size: 0.85em;">
+--------------------------------
+[SOM - Log de Informações]
+Chave Aleatória         : 52
+Iterações               : 20000
+Topologia               : 10 x 10
+Taxa de Aprendizado     : 0.4
+Raio Inicial (Sigma)    : 5.00
+Tau                     : 12426.70
+Melhor Acurácia         : 0.800
+Sistema Operacional     : Windows 10.0.19045
+Python                  : 3.12.9
+--------------------------------</pre>
+                <small style="grid-column: 1; grid-row: 2; text-align: center;">Figura 2: Mapa Configuração Inicial</small>
+              </div>
+            </p>
+            <br>
+            <h4>Fase 2</h4>
+            <p>
+              &emsp;&emsp;Testes com diversos ajustes buscaram a melhor parametrização do modelo. Configurações sem hachura que obtiveram resultados satisfatórios estão descritas abaixo, considerando acurácia e qualidade do mapa. Um dos mapas com pior desempenho também está listado.
             </p>
             <h4>Configuração 1</h4>
             <p>

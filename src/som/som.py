@@ -103,12 +103,12 @@ from matplotlib.colors        import ListedColormap, BoundaryNorm
 # ===== CONFIG & DIRS =====
 @dataclass(frozen=True, slots=True)
 class Config:
-  iters:  int             = 2**16 # n_iterations;   Sugestões: 1000, 5000, 10000, 30000, 50000
-  n:      int             = 5     # map_size;       Sugestões: 5, 10, 15
+  iters:  int             = 20000 # n_iterations;   Sugestões: 1000, 5000, 10000, 30000, 50000
+  n:      int             = 10     # map_size;       Sugestões: 5, 10, 15
   m:      int             = 10    # map_size;       Sugestões: 5, 10, 15
-  lr:     float           = 0.75  # learning_rate;  Sugestões: 0.5, 0.1, 0.01
-  radius: Optional[float] = 2.5   # sigma_0;        Sugestões: 3, 5, 7 (Pode ser computado automaticamente)
-  rand:   Optional[int]   = 00    # random_seed
+  lr:     float           = 0.4  # learning_rate;  Sugestões: 0.5, 0.1, 0.01
+  radius: Optional[float] = 5   # sigma_0;        Sugestões: 3, 5, 7 (Pode ser computado automaticamente)
+  rand:   Optional[int]   = 52    # random_seed
 
   @staticmethod
   def from_args(args: dict[str, Any]) -> 'Config':
@@ -189,7 +189,7 @@ def scale_data(X: pd.DataFrame) -> np.ndarray:
 
 def choose_random_key(key: Optional[int]) -> int:
   val = key if key is not None else random.randint(1, 99)
-  print(f"[Randomizer Key: {val}]")
+  print(f"[Chave Aleatória gerada: {val}]")
   return val
 
 # ===== SOM TRAINING & MAPPINGS =====
@@ -274,7 +274,6 @@ def predict_labels(
 def to_rgba(arr: np.ndarray) -> np.ndarray:
   if arr.shape[-1] == 4:
     return arr
-  # Promote RGB to RGBA, alpha=1.0.
   return np.concatenate([arr, np.ones((*arr.shape[:-1], 1), dtype=arr.dtype)], axis=-1)
 
 def plot_label_maps(
@@ -288,7 +287,6 @@ def plot_label_maps(
   fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
   unl_max: float = float(unlab_map.max()) if np.any(unlab_map) else 1.0
 
-  # AX1: Custom cmap, 0 = light grey RGBA, >0 = Blues gradient RGBA.
   n_shades: int = int(unl_max) + 1
   ticks = np.arange(0, n_shades, n_shades // 5, dtype=int)
   blue_cmap = plt.get_cmap("Blues", n_shades + 1)
@@ -298,7 +296,7 @@ def plot_label_maps(
   bmu_cmap = ListedColormap(colors)
 
   im1 = ax1.imshow(unlab_map, cmap=bmu_cmap, vmin=0, vmax=unl_max)
-  ax1.set_title("SOM Unsupervised: BMU Hit Count")
+  ax1.set_title("Unsupervised: BMU Hit Count")
   fig.colorbar(im1, ax=ax1, shrink=0.7, pad=0.02, ticks=ticks)
   ax1.set_xlabel("SOM X")
   ax1.set_ylabel("SOM Y")
@@ -306,7 +304,6 @@ def plot_label_maps(
   ax1.set_yticks(np.arange(cfg.m))
   ax1.grid(False)
 
-  # AX2: Classes to RGB/RGBA as needed, prepend light grey RGBA.
   flat_labels = filter_valid_labels([x for x in lab_map.ravel()])
   if not flat_labels:
     raise ValueError("Label map has no labels to plot.")
@@ -321,7 +318,6 @@ def plot_label_maps(
   class_colors_rgba = to_rgba(np.asarray(class_colors))
   sup_colors = np.vstack((light_grey, class_colors_rgba))  # 0: grey, 1+: classes
   sup_cmap = ListedColormap(sup_colors)
-  # -1 (no-label)→0, others→shift(+1)
   plot_map = np.where(int_map == -1, 0, int_map + 1)
 
   im2 = ax2.imshow(plot_map, cmap=sup_cmap, vmin=0, vmax=sup_cmap.N - 1)
@@ -384,14 +380,14 @@ def find_latest_model(model_dir: str) -> Optional[str]:
 def validate_model(
   model_path: str, data_path: Optional[str], cfg_override: dict[str, Any], ng: bool
 ) -> None:
-  print(f"Loading SOM model: {model_path}")
+  print(f"Carregando modelo: {model_path}")
   with open(model_path, "rb") as f:
     som = pickle.load(f)
   X, y = fetch_iris(data_path)
   X_scaled = scale_data(X)
   m, n = som.get_weights().shape[0:2]
   cfg: Config = Config(m=m, n=n, **{k: v for k, v in cfg_override.items() if k in {'lr','iters','rand','radius'}})
-  print(f"Loaded model grid is {m} x {n}.")
+  print(f"Modelo tem uma topologia de {m} x {n}.")
   sup_map = map_labels(X_scaled, y, som, cfg)
   unsup_map = map_unsupervised(X_scaled, som, cfg)
   y_uniq = pd.unique(flatten_labels(y))
@@ -411,7 +407,7 @@ def validate_model(
   ensure_dir(PNG_DIR)
   fig_path = os.path.join(PNG_DIR, f"validation-{current_timestr()}.png")
   plot_label_maps(unsup_map, sup_map, cfg, y_uniq_filtered, save_path=fig_path, show=not ng)
-  print(f"Plot saved to: {fig_path}")
+  print(f"Figura salva em: {fig_path}")
 
 # ===== MAIN =====
 def main() -> None:
@@ -432,9 +428,9 @@ def main() -> None:
       if not os.path.exists(model_path):
         model_path = find_latest_model(MODEL_DIR)
         if model_path is None:
-          print("No model found to load in .som directory.")
+          print("Nenhum modelo encontrado em .som")
           return
-        print(f"No model specified or found at path; using latest: {model_path}")
+        print(f"Nenhum modelo especificado; Utilizando o mais recente: {model_path}")
       validate_model(model_path, cli_args.get("data", None), cli_args, ng)
       return
     cfg = Config.from_args(cli_args)
@@ -469,13 +465,13 @@ def main() -> None:
       unsup_map, sup_map, cfg, y_train_uniq_filtered,
       save_path=fig_path, show=not ng
     )
-    print(f"Plot saved to: {fig_path}")
+    print(f"Figura salva em: {fig_path}")
     model_path = os.path.join(
       MODEL_DIR, f"som-model-{timestamp}-{acc:.3f}.som"
     )
     with open(model_path, "wb") as f:
       pickle.dump(som, f)
-    print(f"SOM model saved to: {model_path}")
+    print(f"Modelo salvo em: {model_path}")
   finally:
     sys.stdout = logger.stdout
     sys.stderr = logger.stdout
