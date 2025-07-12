@@ -117,10 +117,13 @@
             <h3>Etapas</h3>
             <div class="text-container">
             <h4>Fase 1</h4>
+            <p>&emsp;&emsp;O programa em Python foi criado utilizando as bibliotecas SciKitLearn e MiniSOM para implementação do modelo SOM. Pandas e NumPy foram utilizados para leitura e manipulação das bases de dados. Por fim, MatPlotLib foi utilizado para visualização dos resultados.</p>
+            <p>&emsp;&emsp;A base de dados utilizada foi o <a href="https://archive.ics.uci.edu/ml/datasets/iris">Iris</a>, que contém 4 atributos e 1 saída de 3 classes distintas (iris-setosa, iris-versicolor e iris-virginica). A base de dados foi carregada em tempo de execução através do comando <code style="display: inline-block; margin: 0 0.2em; padding: 0.2em 0.5em; border-radius: 0.5em; border: 1px solid #666; font-size: 0.85em;">fetch_ucirepo(id=53)</code>, conforme instruído pela provedora da base (UC Irvine).</p><br>
+            <h4>Configuração Inicial</h4>
             <p>
               &emsp;&emsp;O código foi executado a partir da configuração inicial para análise primária:<br><br>
               <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto; align-items: center;">
-                <img src="content/som_fase1_c1.png" alt="Mapa Configuração Inicial" style="width: 100%; height: auto; border-radius: 4px;">
+                <img src="content/som_fase1.png" alt="Mapa Configuração Inicial" style="width: 100%; height: auto; border-radius: 4px;">
                 <pre style="display: block; margin: 0 auto; padding: 1em; border-radius: 0.5em; border: 1px solid #666; font-size: 0.85em;">
 --------------------------------
 [SOM - Log de Informações]
@@ -140,11 +143,11 @@ Python                  : 3.12.9
             <br>
             <h4>Fase 2</h4>
             <p>
-              &emsp;&emsp;Testes com diversos ajustes buscaram a melhor parametrização do modelo. Algumas configurações obtiveram resultados satisfatórios estão descritas abaixo, considerando acurácia e qualidade do mapa. Um dos mapas com pior desempenho também está listado.
+              &emsp;&emsp;Testes com diversos ajustes buscaram a melhor parametrização do modelo. Algumas configurações obtiveram resultados satisfatórios estão descritas abaixo, considerando acurácia e qualidade do mapa. Um dos mapas com pior desempenho também está listado.<br><br>
             </p>
             <h4>Configuração 1</h4>
             <p>
-              &emsp;&emsp;Separação de classes melhor que a original. A acurácia permaneceu em 83,3%.
+              &emsp;&emsp;Separação de classes melhor que a original. A acurácia permaneceu em 83,3%.<br>
               <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto; align-items: center;">
                 <img src="content/som_fase2_c1.png" alt="Mapa Configuração Inicial" style="width: 100%; height: auto; border-radius: 4px;">
                 <pre style="display: block; margin: 0 auto; padding: 1em; border-radius: 0.5em; border: 1px solid #666; font-size: 0.85em;">
@@ -162,10 +165,10 @@ Python                  : 3.12.9
 --------------------------------</pre>
                 <small style="grid-column: 1; grid-row: 2; text-align: center;">Figura 3: Mapa Gerado pela Configuração 1</small>
               </div>
-            </p>
+            </p><br>
             <h4>Configuração 2</h4>
             <p>
-              &emsp;&emsp;Utilizando-se de uma topologia retangular 10 x 5, observa-se um melhor destacamento de grupos e do “vale” que separa neurônios. A alta acurácia (96,7%) indica divisão dos dados em só dois grupos principais, refletindo uma sobreposição nas características (atributos) de Iris-versicolor e Iris-setosa.
+              &emsp;&emsp;Utilizando-se de uma topologia retangular 10 x 5, observa-se um melhor destacamento de grupos e do “vale” que separa neurônios. A alta acurácia (96,7%) indica divisão dos dados em só dois grupos principais, refletindo uma sobreposição nas características (atributos) de Iris-versicolor e Iris-setosa.<br><br>
               <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto; align-items: center;">
                 <img src="content/som_fase2_c2.png" alt="Mapa Configuração Inicial" style="width: 100%; height: auto; border-radius: 4px;">
                 <pre style="display: block; margin: 0 auto; padding: 1em; border-radius: 0.5em; border: 1px solid #666; font-size: 0.85em;">
@@ -178,15 +181,15 @@ Taxa de Aprendizado     : 0.5
 Raio Inicial (Sigma)    : 2.50
 Tau                     : 32740.70
 Melhor Acurácia         : 0.967
-Sistema Operacional     : Linux #1 SMP PREEMPT Tue Jun 3 14:32:57 UTC 2025
+Sistema Operacional     : Linux
 Python                  : 3.12.11
 --------------------------------</pre>
                 <small style="grid-column: 1; grid-row: 2; text-align: center;">Figura 4: Mapa Gerado pela Configuração 2</small>
               </div>
-            </p>
+            </p><br>
             <h4>Configuração 3</h4>
             <p>
-              &emsp;&emsp;Menor taxa de aprendizado e raio inicial resultaram numa separação parcial. A acurácia (86,7%) foi inferior e houve maior dificuldade em definir fronteiras entre atributos.
+              &emsp;&emsp;Menor taxa de aprendizado e raio inicial resultaram numa separação parcial. A acurácia (86,7%) foi inferior e houve maior dificuldade em definir fronteiras entre atributos.<br><br>
               <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto; align-items: center;">
                 <img src="content/som_fase2_c3.png" alt="Mapa Configuração Inicial" style="width: 100%; height: auto; border-radius: 4px;">
                 <pre style="display: block; margin: 0 auto; padding: 1em; border-radius: 0.5em; border: 1px solid #666; font-size: 0.85em;">
@@ -199,15 +202,15 @@ Taxa de Aprendizado     : 0.2
 Raio Inicial (Sigma)    : 1.50
 Tau                     : 49326.07
 Melhor Acurácia         : 0.867
-Sistema Operacional     : Linux #1 SMP PREEMPT Tue Jun 3 14:32:57 UTC 2025
+Sistema Operacional     : Linux
 Python                  : 3.12.11
 --------------------------------</pre>
                 <small style="grid-column: 1; grid-row: 2; text-align: center;">Figura 5: Mapa Gerado pela Configuração 3</small>
               </div>
-            </p>
+            </p><br>
             <h4>Configuração 4</h4>
             <p>
-              &emsp;&emsp;Elevada acurácia (96,7%) e separação mais uniforme dos neurônios ativados (BMUs) em 2 grupos, indicando um possível 3º grupo. Aumentar iterações por vezes melhora a representação topológica, reduzindo sobreposições e aumentando a qualidade do mapa.
+              &emsp;&emsp;Elevada acurácia (96,7%) e separação mais uniforme dos neurônios ativados (BMUs) em 2 grupos, indicando um possível 3º grupo. Aumentar iterações por vezes melhora a representação topológica, reduzindo sobreposições e aumentando a qualidade do mapa.<br><br>
               <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto; align-items: center;">
                 <img src="content/som_fase2_c4.png" alt="Mapa Configuração Inicial" style="width: 100%; height: auto; border-radius: 4px;">
                 <pre style="display: block; margin: 0 auto; padding: 1em; border-radius: 0.5em; border: 1px solid #666; font-size: 0.85em;">
@@ -220,23 +223,41 @@ Taxa de Aprendizado     : 0.25
 Raio Inicial (Sigma)    : 2.00
 Tau                     : 94548.46
 Melhor Acurácia         : 0.967
-Sistema Operacional     : Linux #1 SMP PREEMPT Tue Jun 3 14:32:57 UTC 2025
+Sistema Operacional     : Linux
 Python                  : 3.12.11
 --------------------------------</pre>
-                <small style="grid-column: 1; grid-row: 2; text-align: center;">Figura 5: Mapa Gerado pela Configuração 4</small>
+                <small style="grid-column: 1; grid-row: 2; text-align: center;">Figura 6: Mapa Gerado pela Configuração 4</small>
               </div>
-            </p>
-          </div>
-          <h3>Configuração com Hachura</h3>
-          <div class="text-container">
-            <h4>Configuração 5 – Hachura</h4>
+            </p><br>
+            <h4>Fase 3</h4>
+            <p>&emsp;&emsp;A fase 3 consistiu na aplicação da técnica de hachura para melhorar a interpretação dos mapas supervisionados e não supervisionados.</p>
+            <p>&emsp;&emsp;Regiões contendo neurônios que NÃO foram ativados passaram a ser representadas com um fundo cinza e hachurado. Esta mesma representação foi translocada para o mapa rotulado, assim melhor representando a correlação de neurônios ativados com a classe.</p>
+            <p>&emsp;&emsp;Mais uma vez vale ressaltar que o gráfico rotulado serve apenas como apoio ao leitor, não guiando diretamente o desenvolvimento do trabalho.</p>
+            <br>
+            <h4>Configuração Final</h4>
             <p>
-              <b>Chave Aleatória:</b> 33<br>
-              Iterações: 65.536 | Topologia: 8x8 | Taxa Aprendizado: 0.25 | Raio Inicial: 2.00 | Tau: 94.548,46 | Melhor Acurácia: 0.967<br>
-              <img src="content/som_config5.png" alt="Mapa Configuração 5 com Hachura" style="width: 100%; height: auto; border-radius: 4px;">
-              <small>Figura 7: Mapa Configuração 5 com hachura</small><br>
-              Antes, regiões em branco nos mapas indicavam neurônios não ativados, dificultando a análise clara das zonas de ativação. A aplicação da **técnica de hachura** para marcar essas áreas permitiu identificar “vales” ou regiões sem ativação, facilitando a interpretação dos mapas supervisionado e não supervisionado.
-            </p>
+              &emsp;&emsp;A configuração final foi escolhida por gerar as melhores métricas que decidimos acompanhar: uma altíssima acurácia de 96,7% junto de um mapa de Kohonen de excelente distinção dentre BMUs.<br><br>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto; align-items: center;">
+                <img src="content/som_fase3.png" alt="Mapa Configuração Inicial" style="width: 100%; height: auto; border-radius: 4px;">
+                <pre style="display: block; margin: 0 auto; padding: 1em; border-radius: 0.5em; border: 1px solid #666; font-size: 0.85em;">
+--------------------------------
+[SOM - Log de Informações]
+Chave Aleatória         : 33
+Iterações               : 65536
+Topologia               : 8 x 8
+Taxa de Aprendizado     : 0.25
+Raio Inicial (Sigma)    : 2.00
+Tau                     : 94548.46
+Melhor Acurácia         : 0.967
+Sistema Operacional     : Linux
+Python                  : 3.12.11
+--------------------------------</pre>
+                <small style="grid-column: 1; grid-row: 2; text-align: center;">Figura 5: Mapa Gerado pela Configuração Final</small>
+              </div>
+            </p><br>
+            <p>&emsp;&emsp;No gráfico não rotulado é possível notar 2 claras regiões de ativação de neurônios. Entretanto, na região da esquerda, nota-se uma "quasi-fronteira" formando-se, o que nos indica com certa clareza que há uma mistura heterogênea entre determinado grupo de atributos que ativem neurônios desta região.</p>
+            <p>&emsp;&emsp;A reprodução do programa com estes parâmetros e sem uma Chave Aleatória pré-definida (o que gera resultados diferentes a cada execução) demonstra consistentemente a divisão de 2 grupos de ativação. Nota-se na mesma frequência que 1 dos grupos sempre tende a dividir-se parcialmente, mas nunca formando fronteiras claras.</p>
+            <br>
           </div>
         </div>
       </div>
@@ -250,7 +271,7 @@ Python                  : 3.12.11
         <div class="card">
           <div class="text-container">
             <li>
-              Conclui-se que a configuração 5, contendo a técnica de hachura para destaque de neurônios não ativados, apresentou melhor desempenho e maior clareza visual dos resultados. 
+              Conclui-se que a configuração final, contendo a técnica de hachura para destaque de neurônios não ativados, apresentou melhor desempenho e maior clareza visual dos resultados. 
               Os testes evidenciaram a importância do ajuste de hiperparâmetros, sendo que grids maiores e mais iterações aprimoram a separação das classes.
             </li>
             <br>
@@ -262,6 +283,8 @@ Python                  : 3.12.11
               O modelo Kohonen, aliado a uma análise crítica dos mapas gerados, evidenciou os limites da acurácia como métrica isolada, destacando a relevância de visualizações claras de clusterização para compreender a estrutura dos dados.
             </li>
             <br>
+            <li>
+              A distinção confusa do segundo grupo de BMUs indicados nos mapas de Kohonen gerados mostrou que nem toda base de dados é composta de atributos que perfeitamente explicam as classes. Por fim concluímos assim que o modelo de Kohonen aponta "dois e meio" grupos de atributos, o que indicaria em um cenário de produção de dados para aplicação real em áreas especializadas ou de pesquisa a necessidade de buscar expandir a base de dados com mais atributos ou refatorar os atributos existentes para melhorar a distinção entre estes e suas correlações com as classes de saída.
             <p><strong>Referências:</strong><br>
               FISHER, Ronald. Iris. <a href="https://archive.ics.uci.edu/dataset/53/iris">https://archive.ics.uci.edu/dataset/53/iris</a>.<br>
               KLÖSGEN, Willi; MAY, Michael. <a href="https://doi.org/10.1007/3-540-45681-3_23">Spatial subgroup mining integrated in an object-relational spatial database</a>. Springer, 2002.<br>
