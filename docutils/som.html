@@ -101,6 +101,17 @@
             </p>
             <br>
             <code style="display: block; text-align: center; margin: 0 auto; padding: 1em; border-radius: 0.5em; border: 1px solid #666; font-size: 0.85em;">n_iter / np.log(cfg.radius)</code>
+            <br>
+            <h4>Métricas</h4>
+            <p>
+              &emsp;&emsp;Para decidirmos qual foi o melhor resultado, foram utilizadas as seguintes métricas:
+              <li>Acurácia; Proporção de amostras classificadas corretamente.</li>
+              <li>Distância; O visível agrupamento de neurônios ativados e os vales de <b>não ativação</b> de neurônios.</li>
+              <br>
+              <p>
+                &emsp;&emsp;Pela natureza não supervisionada do modelo SOM, consideramos somente os resultados visíveis nos mapas gerados à esquerda das figuras demonstrativas. À direita estão presentes as correlações de cada região de ativação com as verdadeiras classes das base de dados. Isso serve como um "bônus" que possibilita o contraste dos resultados obtidos com a base de dados real, mas não guiou diretamente a nossa tomada de decisões no decorrer dos experimentos.
+              </p>
+            </p>
           </div>
             <br>
             <h3>Etapas</h3>
@@ -129,7 +140,7 @@ Python                  : 3.12.9
             <br>
             <h4>Fase 2</h4>
             <p>
-              &emsp;&emsp;Testes com diversos ajustes buscaram a melhor parametrização do modelo. Configurações sem hachura que obtiveram resultados satisfatórios estão descritas abaixo, considerando acurácia e qualidade do mapa. Um dos mapas com pior desempenho também está listado.
+              &emsp;&emsp;Testes com diversos ajustes buscaram a melhor parametrização do modelo. Algumas configurações sem hachura que obtiveram resultados satisfatórios estão descritas abaixo, considerando acurácia e qualidade do mapa. Um dos mapas com pior desempenho também está listado.
             </p>
             <h4>Configuração 1</h4>
             <p>
