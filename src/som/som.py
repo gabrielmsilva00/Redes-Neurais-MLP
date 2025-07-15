@@ -104,12 +104,12 @@ from matplotlib.colors        import ListedColormap, BoundaryNorm
 # ===== CONFIGS =====
 @dataclass(frozen=True, slots=True)
 class Config:
-  iters:  int             = 2**16 # n_iterations;   Sugestões: 1000, 5000, 10000, 30000, 50000
-  n:      int             = 10     # map_size;       Sugestões: 5, 10, 15
-  m:      int             = 10     # map_size;       Sugestões: 5, 10, 15
-  lr:     float           = 0.4  # learning_rate;  Sugestões: 0.5, 0.1, 0.01
-  radius: Optional[float] = 5.0   # sigma_0;        Sugestões: 3, 5, 7 (Pode ser computado automaticamente)
-  rand:   Optional[int]   = 52    # random_seed
+  iters:  int             = 2**8  # n_iterations;   Sugestões: 1000, 5000, 10000, 30000, 50000
+  n:      int             = 2**6   # map_size;       Sugestões: 5, 10, 15
+  m:      int             = 2**6   # map_size;       Sugestões: 5, 10, 15
+  lr:     float           = 2**-2  # learning_rate;  Sugestões: 0.5, 0.1, 0.01
+  radius: Optional[float] = 2**4   # sigma_0;        Sugestões: 3, 5, 7 (Pode ser computado automaticamente)
+  rand:   Optional[int]   = 0      # random_seed
 
   @staticmethod
   def from_args(args: dict[str, Any]) -> 'Config':
@@ -289,20 +289,22 @@ def plot_label_maps(
   unl_max: float = float(unlab_map.max()) if np.any(unlab_map) else 1.0
 
   n_shades: int = int(unl_max) + 1
-  ticks = np.arange(0, n_shades, n_shades // 5, dtype=int)
+  cticks = np.arange(0, n_shades, max(n_shades // 5, 1), dtype=int)
+  xticks = np.arange(0, cfg.n, max(1, cfg.n // 5), dtype=int)
+  yticks = np.arange(0, cfg.m, max(1, cfg.m // 5), dtype=int)
   blue_cmap = plt.get_cmap("Blues", n_shades + 1)
   blue_arr = to_rgba(blue_cmap(np.arange(2, n_shades + 1)))
-  light_grey = np.array([[236/255, 236/255, 236/255, 1]])
+  light_grey = np.array([[128/255, 128/255, 128/255, 1]])
   colors = np.vstack((light_grey, blue_arr))
   bmu_cmap = ListedColormap(colors)
 
   im1 = ax1.imshow(unlab_map, cmap=bmu_cmap, vmin=0, vmax=unl_max)
   ax1.set_title("Não Rotulado: BMU por Frequência")
-  fig.colorbar(im1, ax=ax1, shrink=0.7, pad=0.02, ticks=ticks)
+  fig.colorbar(im1, ax=ax1, shrink=0.7, pad=0.02, ticks=cticks)
   ax1.set_xlabel("SOM X")
   ax1.set_ylabel("SOM Y")
-  ax1.set_xticks(np.arange(cfg.n))
-  ax1.set_yticks(np.arange(cfg.m))
+  ax1.set_xticks(xticks)
+  ax1.set_yticks(yticks)
   ax1.grid(False)
 
   flat_labels = filter_valid_labels([x for x in lab_map.ravel()])
@@ -325,23 +327,23 @@ def plot_label_maps(
   ax2.set_title("Rotulado: BMU por Classe")
   ax2.set_xlabel("SOM X")
   ax2.set_ylabel("SOM Y")
-  ax2.set_xticks(np.arange(cfg.n))
-  ax2.set_yticks(np.arange(cfg.m))
+  ax2.set_xticks(xticks)
+  ax2.set_yticks(yticks)
   cbar = fig.colorbar(im2, ax=ax2, ticks=np.arange(1, len(class_set) + 1), pad=0.02, shrink=0.7)
   cbar.ax.set_yticklabels(class_set)
   ax2.grid(False)
 
-  def overlay_hatch(ax, mask: np.ndarray, color: str = "#787878") -> None:
-    for (i, j), flagged in np.ndenumerate(mask):
-      if flagged:
-        ax.add_patch(plt.Rectangle(
-          (j - 0.5, i - 0.5), 1, 1,
-          fill=False,
-          edgecolor=color, linewidth=1.15, hatch='xxx', zorder=3
-        ))
+  # def overlay_hatch(ax, mask: np.ndarray, color: str = "#787878") -> None:
+  #   for (i, j), flagged in np.ndenumerate(mask):
+  #     if flagged:
+  #       ax.add_patch(plt.Rectangle(
+  #         (j - 0.5, i - 0.5), 1, 1,
+  #         fill=False,
+  #         edgecolor=color, linewidth=1.15, hatch='xxx', zorder=3
+  #       ))
 
-  overlay_hatch(ax1, (unlab_map == 0))
-  overlay_hatch(ax2, (int_map == -1))
+  # overlay_hatch(ax1, (unlab_map == 0))
+  # overlay_hatch(ax2, (int_map == -1))
 
   fig.suptitle("SOM Visualization", fontsize=16)
   fig.text(0.5, 0.94, f"[Randomizer Key: {cfg.rand}]", ha="center", va="top", fontsize=9)
