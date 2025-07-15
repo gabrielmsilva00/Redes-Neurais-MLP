@@ -94,14 +94,14 @@ class DataManager:
       df = pd.read_csv(f"zip://{filepath}" if filepath.endswith(".zip") else filepath)
       if df.shape[1] < 2:
         raise ValueError("O dataset deve conter ao menos duas colunas (uma feature e um target).")
-      
+
       self.y = df.iloc[:, -1]
       numeric_df = df.select_dtypes(include=np.number)
-      
+
       self.X = numeric_df.drop(columns=[self.y.name], errors='ignore')
       if self.X.empty:
         raise ValueError("Nenhuma coluna numérica (diferente do target) foi encontrada para features.")
-        
+
       self.title = os.path.basename(filepath)
       self.target_name = str(self.y.name)
       self.feature_names = self.X.columns.tolist()
@@ -117,7 +117,7 @@ class DataManager:
       self.title = self.meta.get("name", f"Dataset ID {dataset_id}")
       self.X = dataset.data.features.select_dtypes(include=np.number)
       self.y = dataset.data.targets.iloc[:, 0]
-      
+
       if self.X.empty:
         raise ValueError(f"O dataset '{self.title}' (ID: {dataset_id}) não possui features numéricas.")
 
@@ -198,7 +198,7 @@ class SOMModel:
     win_map_full = self._get_win_map(X_scaled)
     self.label_map, self.bmu_hits = self._create_label_and_hit_maps(win_map_full, y_full)
     y_pred = self._predict(X_test)
-    
+
     accuracy = accuracy_score(y_test, y_pred) if len(y_test) > 0 else 0.0
 
     return Metrics(
@@ -227,18 +227,18 @@ class SOMModel:
   def _predict(self: "SOMModel", X: np.ndarray) -> np.ndarray:
     if self.label_map is None:
       raise RuntimeError("O mapa de rótulos não foi criado. Treine o modelo primeiro.")
-    
+
     valid_labels = pd.Series(self.label_map.flatten()).dropna()
     if valid_labels.empty:
         return np.array(["N/A"] * len(X))
 
     fallback = valid_labels.mode()[0]
-    
+
     def get_label(x: np.ndarray) -> Any:
       winner_pos = self.som.winner(x)
       label = self.label_map[winner_pos]
       return label if label is not None else fallback
-      
+
     return np.array([get_label(x) for x in X])
 
 class PlottingService:
@@ -282,12 +282,12 @@ class PlottingService:
     fig, ax = self._create_base_figure()
     ax.set_title(title, fontsize=12, pad=10)
     m, n = self.model.config.m, self.model.config.n
-    
+
     is_hex = self.model.config.topology == 'hexagonal'
-    
+
     ax.set_aspect('equal')
     ax.set_xticks([]); ax.set_yticks([])
-    
+
     for i in range(m):
         for j in range(n):
             val = data_map[i, j]
@@ -335,7 +335,7 @@ class PlottingService:
     X_scaled = self.data.get_scaled_data()
     pca = PCA(n_components=2, random_state=self.model.config.rand_seed)
     X_pca = pca.fit_transform(X_scaled)
-    
+
     bmu_labels = None
     if self.model.label_map is not None and pd.Series(self.model.label_map.flatten()).notna().any():
       bmu_labels = self.model._predict(X_scaled)
@@ -349,7 +349,7 @@ class PlottingService:
         ax.legend()
       else:
         ax.scatter(X_pca[:, 0], X_pca[:, 1], c=['#0000FF'], s=20, alpha=0.7)
-      
+
       ax.set_title("Clusterização por Classe" if show_labels and bmu_labels is not None else "Clusterização", fontsize=12)
       ax.set_xlabel("Componente Principal 1"); ax.set_ylabel("Componente Principal 2")
       ax.grid(True, linestyle='--', alpha=0.6); canvas.draw_idle()
@@ -369,6 +369,11 @@ class PlottingService:
     angles = np.linspace(0, 2 * np.pi, self.data.get_num_features(), endpoint=False).tolist() + [0]
     ax.set_thetagrids(np.degrees(angles[:-1]), self.data.feature_names)
 
+    overall_centroid = weights_scaled.mean(axis=0)
+    overall_data = np.concatenate((overall_centroid, [overall_centroid[0]]))
+    overall_line, = ax.plot(angles, overall_data, label="Média Geral", linewidth=2, color='#0000FF')
+    overall_fill = ax.fill(angles, overall_data, alpha=0.25, color='#0000FF')
+
     lines, fills = [], []
     for i, label in enumerate(self.class_labels):
       neuron_indices = np.argwhere(self.model.label_map == label)
@@ -380,11 +385,14 @@ class PlottingService:
         lines.append(line); fills.append(fill)
 
     def redraw(show_labels: bool) -> None:
+      overall_line.set_visible(not show_labels)
+      for patch in overall_fill:
+        patch.set_color('#0000FF' if not show_labels else 'none')
       for line, fill_patches in zip(lines, fills):
         line.set_visible(show_labels)
         for patch in fill_patches:
-          patch.set_color(line.get_color() if show_labels else '#0000FF')
-      ax.legend(loc='upper left', bbox_to_anchor=(-0.1, 1.1))
+          patch.set_color(line.get_color() if show_labels else 'none')
+      ax.legend(loc='upper left', bbox_to_anchor=(-0.3075, 1.075), fontsize=10)
       ax.get_legend().set_visible(show_labels)
       ax.set_title("Centróides por Classe" if show_labels else "Centróides", fontsize=12)
       canvas.draw_idle()
@@ -506,7 +514,7 @@ class UIController(ttk.Window):
     
     id_frame = ttk.Frame(panel)
     id_frame.pack(fill=X, pady=(0, 5))
-    ttk.Label(id_frame, text="ID:").pack(side=LEFT, padx=(0, 5))
+    ttk.Label(id_frame, text="UCI ID:").pack(side=LEFT, padx=(0, 5))
     vcmd_int = (self.register(self._validate_int), '%P')
     self.db_id_entry = ttk.Entry(id_frame, textvariable=self.database_id_var, width=10, justify=CENTER, validate="key", validatecommand=vcmd_int)
     self.db_id_entry.pack(side=LEFT)
@@ -545,10 +553,10 @@ class UIController(ttk.Window):
 
     combos = {
         "Topologia": (self.topology_var, ['rectangular', 'hexagonal']),
-        "Distância de Ativação": (self.activation_distance_var, ['euclidean', 'cosine', 'manhattan', 'chebyshev']),
-        "Função de Vizinhança": (self.neighborhood_function_var, ['gaussian', 'mexican_hat', 'bubble', 'triangle']),
-        "Decaimento do Aprend.": (self.decay_function_var, ['asymptotic_decay', 'inverse_decay_to_zero', 'linear_decay_to_zero']),
-        "Decaimento do Sigma": (self.sigma_decay_function_var, ['asymptotic_decay', 'inverse_decay_to_one', 'linear_decay_to_one'])
+        "Dist. de Ativação": (self.activation_distance_var, ['euclidean', 'cosine', 'manhattan', 'chebyshev']),
+        "f(x) Vizinhança": (self.neighborhood_function_var, ['gaussian', 'bubble']),
+        "f(x) Aprendizado.": (self.decay_function_var, ['asymptotic_decay', 'inverse_decay_to_zero', 'linear_decay_to_zero']),
+        "f(x) Sigma": (self.sigma_decay_function_var, ['asymptotic_decay', 'inverse_decay_to_one', 'linear_decay_to_one'])
     }
     self.comboboxes = [create_combo_row(panel, text, var, val) for text, (var, val) in combos.items()]
 
@@ -623,20 +631,20 @@ class UIController(ttk.Window):
           self.save_graph_button_frame.pack_forget()
 
   def _reset_config_to_defaults(self: "UIController") -> None:
-    self.database_id_var.set(109)
-    self.m_var.set(15); self.n_var.set(15)
-    self.iters_var.set(5000); self.lr_var.set(0.5)
+    self.database_id_var.set(544)
+    self.m_var.set(16); self.n_var.set(32)
+    self.iters_var.set(40000); self.lr_var.set(0.8)
     self.radius_is_auto.set(True)
     self.rand_seed_is_random.set(True)
     self.rand_seed_var.set(42)
-    self.topology_var.set('rectangular')
+    self.topology_var.set('hexagonal')
     self.activation_distance_var.set('euclidean')
     self.neighborhood_function_var.set('gaussian')
     self.decay_function_var.set('asymptotic_decay')
     self.sigma_decay_function_var.set('asymptotic_decay')
     self._toggle_radius_entry()
     self._toggle_seed_entry()
-    
+
   def _toggle_radius_entry(self: "UIController") -> None:
     self.radius_entry.config(state=DISABLED if self.radius_is_auto.get() else NORMAL)
 
@@ -722,13 +730,14 @@ class UIController(ttk.Window):
   def _update_data_info(self: "UIController") -> None:
     info = self.data_manager.get_info()
     title = info.get("title", "N/A")
+    title = title[:27] + "..." if len(title) >= 30 else title
     self.db_title_label.config(text=f"Título: {title}")
-    
+
     for i in self.notebook.tabs()[1:]: self.notebook.forget(i)
     self.report_tab_exists = False
-    
-    metadata_report = self._get_metadata_text()
-    
+
+    metadata_report = self.get_metadata_text()
+
     self.metadata_text.config(state=NORMAL)
     self.metadata_text.delete("1.0", END)
     self.metadata_text.insert(END, metadata_report + "\n\n")
@@ -752,7 +761,7 @@ class UIController(ttk.Window):
     try:
       load_func(source)
       self._queue_update(self._update_data_info)
-      self._queue_update(self._update_status, f"Dataset '{self.data_manager.title}' carregado.", 100, "success")
+      self._queue_update(self._update_status, f"Dados de '{self.data_manager.title if len(self.data_manager.title) <= 20 else self.data_manager.title[:17] + '...'} carregados.", 100, "success")
     except Exception as e:
       self._queue_update(messagebox.showerror, "Erro de Dados", str(e))
       self._queue_update(self._update_status, "Falha ao carregar dados.", 100, "danger")
@@ -791,19 +800,19 @@ class UIController(ttk.Window):
       self._queue_update(self._update_status, "1/4 - Preparando dados...", 5)
       num_features = self.data_manager.get_num_features()
       X_train, X_test, _, y_test = self.data_manager.get_data_split(config.rand_seed)
-      
+
       self.som_model = SOMModel(config, num_features)
-      
+
       training_status_msg = "2/4 - Treinando o SOM..."
       self._queue_update(self._update_status, training_status_msg, 15)
       self.som_model.train(X_train, lambda p: self._queue_update(self._update_status, training_status_msg, progress=15 + p * 0.6), self.stop_event)
       if self.stop_event.is_set(): raise InterruptedError
-      
+
       self._queue_update(self._update_status, "3/4 - Validando e calculando métricas...", 80)
       metrics = self.som_model.calculate_validation_metrics(self.data_manager.get_scaled_data(), self.data_manager.y.values.ravel(), X_test, y_test)
-      
+
       self._queue_update(self._create_report_tab)
-      report_text = self._get_training_report_text(metrics=metrics, config=config)
+      report_text = self.get_training_report_text(metrics=metrics, config=config)
       self._queue_update(self._update_report_ui, report_text, clear=True)
       
       self._queue_update(self._update_status, "4/4 - Gerando visualizações...", 95)
@@ -829,7 +838,7 @@ class UIController(ttk.Window):
     os.environ['PYTHONHASHSEED'] = str(seed)
     random.seed(seed)
     np.random.seed(seed)
-    
+
   def get_dict_text(self: "UIController", d: Dict[str, Any]) -> str:
     lines = []
     pointers = ('├', '└')
@@ -839,19 +848,35 @@ class UIController(ttk.Window):
       line = f"{pointer}─{k}:\n"
 
       if isinstance(v, dict):
-        line += '\n'.join(f"\t{l}" for l in self.get_dict_text(v).splitlines()) + '\n'
+        line += '\n'.join(f"\t{l}" for l in self.get_dict_text(v).splitlines())
       elif isinstance(v, (bytes, str)) and len(v) > 100:
-        line += f"\t┊\n\t┊┈{v.rstrip("\n")}\n┊┈┈┈┈┈"
+        line += f"\t┊┈{v.strip(os.linesep).rstrip().lstrip()}\n\t┊┈┈┈"
       else:
-        line += f"\t└─{v}\n"
-      lines.append(line.expandtabs(4))
+        line += f"\t└─{v}"
+      
+      line = line.expandtabs(2)
+      split = line.splitlines()
+      for i, l in enumerate(split):
+        if i == 0: continue
+        if "└─" in l and "├" in split[i - 1]:
+          fork_pos = split[i - 1].find("├")
+          while fork_pos > -1:
+            split[i] = split[i][:fork_pos] + "│" + split[i][fork_pos + 1:]
+            fork_pos = split[i - 1].find("├", fork_pos + 1)
+        elif "├" in l and "├" in split[i - 1]:
+          fork_pos = split[i - 1].find("├")
+          while fork_pos > -1:
+            split[i] = split[i][:fork_pos] + "│" + split[i][fork_pos + 1:]
+            fork_pos = split[i - 1].find("├", fork_pos + 1)
+
+      lines.append('\n'.join(split))
 
     return '\n'.join(lines)
 
-  def _get_metadata_text(self) -> str:
+  def get_metadata_text(self) -> str:
       info = self.data_manager.get_info()
-      report_lines = [f"Metadados do Dataset: {info.get('title', 'N/A')}"]
-      report_lines.append("=" * len(report_lines[0]))
+      report_lines = [f"┌ Metadados da Base: {info.get('title', 'N/A')} ┐"]
+      report_lines.append("├" + "─" * (len(report_lines[0]) - 2) + "┘")
       
       if info.get("meta"):
           report_lines.append(self.get_dict_text(info["meta"]))
@@ -859,29 +884,55 @@ class UIController(ttk.Window):
           report_lines.append("Nenhum metadado disponível. Carregue um dataset.")
       return "\n".join(report_lines)
 
-  def _get_training_report_text(self, metrics: Metrics, config: Config) -> str:
-    report_lines = [f"Relatório de Treinamento: {self.data_manager.get_info().get('title', 'N/A')}"]
-    report_lines.append("=" * len(report_lines[0]))
+  def get_training_report_text(self, metrics: Metrics, config: Config) -> str:
+    report_lines = [f"┌ Relatório de Treinamento: {self.data_manager.get_info().get('title', 'N/A')} ┐"]
+    report_lines.append("├" + "─" * (len(report_lines[0]) - 2) + "┘")
     
+    metadata_text = self.get_metadata_text().splitlines()
+    id_found, url_found, task_found, instances_found, features_found = False, False, False, False, False
+    for i, line in enumerate(metadata_text):
+        if not id_found and "id" in line:
+            report_lines.append(line)
+            report_lines.append(metadata_text[i + 1])
+            id_found = True
+        if not url_found and "url" in line:
+            report_lines.append(line)
+            report_lines.append(metadata_text[i + 1])
+            url_found = True
+        if not task_found and "tasks" in line:
+            report_lines.append(line)
+            report_lines.append(metadata_text[i + 1])
+            task_found = True
+        if not instances_found and "instances" in line:
+            report_lines.append(line)
+            report_lines.append(metadata_text[i + 1])
+            instances_found = True
+        if not features_found and "features" in line:
+            report_lines.append(line)
+            report_lines.append(metadata_text[i + 1])
+            features_found = True
+
+    for i in reversed(range(len(report_lines))):
+        if report_lines[i].startswith("├"):
+            report_lines[i] = "└" + report_lines[i][1:]
+            report_lines[i + 1] = " " + report_lines[i + 1][1:]
+            break
+
     radius_str = f"{config.radius:.2f}" if isinstance(config.radius, float) else "auto"
-    report_lines.append("\nConfiguração do Treinamento\n" + "-" * 27)
-    config_dict = {
+    report_lines.append("\n┌ Configuração do Treinamento ┐\n" + "├" + "─" * 29 + "┘")
+    report_lines.append(self.get_dict_text({
         "Semente Aleatória": config.rand_seed, "Topologia": config.topology,
         "Dist. de Ativação": config.activation_distance, "Func. de Vizinhança": config.neighborhood_function,
         "Decaimento Aprend.": config.decay_function, "Decaimento Sigma": config.sigma_decay_function,
         "Iterações": config.iters, "Taxa de Aprendizado": config.lr, "Raio Inicial": radius_str
-    }
-    for k, v in config_dict.items():
-        report_lines.append(f"● {k}:\n\t○ {v}".expandtabs(4))
+    }))
 
-    report_lines.append("\nMétricas de Performance\n" + "-" * 23)
-    metrics_dict = {
+    report_lines.append("\n┌ Métricas de Performance ┐\n" + "├" + "─" * 25 + "┘")
+    report_lines.append(self.get_dict_text({
         "Acurácia": f"{metrics.accuracy*100:.4f}",
         "Erro de Quantização": f"{metrics.quantization_error*100:.4f}%",
         "Erro Topográfico": f"{metrics.topographic_error*100:.4f}%"
-    }
-    for k, v in metrics_dict.items():
-        report_lines.append(f"● {k}:\n\t○ {v}".expandtabs(4))
+    }))
             
     return "\n".join(report_lines)
 
@@ -934,29 +985,13 @@ class UIController(ttk.Window):
         return
 
     try:
-        report_width, padding, bg_color = 400, 20, "#FFFFFF"
+        report_width, padding, bg_color = 480, 20, "#FFFFFF"
         _, font_size = self.report_font
         try: font = ImageFont.truetype("cour.ttf", font_size)
         except IOError: font = ImageFont.load_default()
 
         temp_draw = ImageDraw.Draw(Image.new("RGB", (0, 0)))
-        wrapped_text = ""
-        for line in report_text.split('\n'):
-            if temp_draw.textlength(line, font=font) <= report_width - 2 * padding:
-                wrapped_text += line + '\n'
-                continue
-            
-            new_line, words = "", line.split(' ')
-            for word in words:
-                if temp_draw.textlength(f"{new_line} {word}", font=font) < report_width - 2 * padding:
-                    new_line += f" {word}"
-                else:
-                    wrapped_text += new_line.strip() + '\n'
-                    new_line = f"  {word}"
-            wrapped_text += new_line.strip() + '\n'
-
-        wrapped_text = wrapped_text.strip()
-        text_bbox = temp_draw.multiline_textbbox((0, 0), wrapped_text, font=font, align="left")
+        text_bbox = temp_draw.multiline_textbbox((0, 0), report_text, font=font, align="left")
         text_height = text_bbox[3] - text_bbox[1]
 
         final_height = max(text_height + 2 * padding, graph_img.height)
@@ -964,12 +999,11 @@ class UIController(ttk.Window):
         draw = ImageDraw.Draw(report_img)
 
         text_y = (final_height - text_height) / 2
-        draw.multiline_text((padding, text_y), wrapped_text, font=font, fill="black", align="left")
+        draw.multiline_text((padding, text_y), report_text, font=font, fill="black", align="left")
 
-        # Adjust the final image creation to avoid overlap between the report text and the graph
         final_img = Image.new("RGB", (report_img.width + graph_img.width, final_height), bg_color)
         final_img.paste(graph_img, (0, 0))
-        final_img.paste(report_img, (int(graph_img.width * 0.95), 0))
+        final_img.paste(report_img, (int(graph_img.width * 0.88), 0))
         final_img.save(filepath)
         self._update_status(f"Imagem composta salva em {os.path.basename(filepath)}")
     except Exception as e:
@@ -996,7 +1030,7 @@ class UIController(ttk.Window):
       messagebox.showerror("Erro ao Salvar", f"Não foi possível salvar o modelo: {e}")
 
   def load_model(self: "UIController") -> None:
-    if not self.data_manager.X:
+    if self.data_manager.X.empty:
       messagebox.showwarning("Sem Dados", "Carregue dados para validação antes de carregar um modelo.")
       return
     filepath = filedialog.askopenfilename(filetypes=[("Modelo SOM", "*.som")], title="Carregar Modelo")
@@ -1028,7 +1062,7 @@ class UIController(ttk.Window):
       self.som_model = SOMModel(cfg, num_features)
       self.som_model.som = model_data.som
       
-      self._update_status("Modelo carregado. Re-validando com dados atuais...")
+      self._update_status("Modelo carregado. Validando com dados atuais...")
       self._execute_in_thread(self._validation_worker_from_load, model_data)
 
     except Exception as e:
@@ -1040,13 +1074,13 @@ class UIController(ttk.Window):
         self._set_random_seed(model_data.config.rand_seed)
         self._queue_update(self._update_status, "1/3 - Preparando dados para validação...", 10)
         _, X_test, _, y_test = self.data_manager.get_data_split(model_data.config.rand_seed)
-        
+
         self.som_model.label_map = model_data.label_map
         
         self._queue_update(self._update_status, "2/3 - Calculando métricas...", 50)
         win_map = self.som_model._get_win_map(self.data_manager.get_scaled_data())
         _, self.som_model.bmu_hits = self.som_model._create_label_and_hit_maps(win_map, self.data_manager.y.values.ravel())
-        
+
         y_pred = self.som_model._predict(X_test)
         metrics = Metrics(
             accuracy=accuracy_score(y_test, y_pred) if len(y_test) > 0 else 0.0,
@@ -1054,12 +1088,12 @@ class UIController(ttk.Window):
             topographic_error=self.som_model.som.topographic_error(X_test)
         )
         self._queue_update(self._create_report_tab)
-        report = self._get_training_report_text(metrics=metrics, config=model_data.config)
+        report = self.get_training_report_text(metrics=metrics, config=model_data.config)
         self._queue_update(self._update_report_ui, report, clear=True)
-        
+
         self._queue_update(self._update_status, "3/3 - Gerando visualizações...", 90)
         self._queue_update(self.display_results)
-        self._queue_update(self._update_status, "Modelo revalidado com sucesso.", 100, "success")
+        self._queue_update(self._update_status, "Modelo validado com sucesso.", 100, "success")
 
     except Exception as e:
         self._queue_update(self._update_status, f"Erro na validação: {e}", 100, "danger")
