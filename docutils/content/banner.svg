@@ -1,0 +1,826 @@
+<svg
+  width="1200"
+  height="630"
+  viewBox="0 0 1200 630"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <title>Redes Neurais - Diagrama MLP</title>
+  <desc>
+    Diagrama de um Perceptron Multi-Camadas (MLP) com camadas de entrada,
+    ocultas e saída.
+  </desc>
+
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0b1020;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#121735;stop-opacity:1" />
+    </linearGradient>
+
+    <radialGradient id="bgLayer1" cx="50%" cy="50%" r="55%">
+      <stop offset="0%" style="stop-color:#4f46e5;stop-opacity:0.14" />
+      <stop offset="100%" style="stop-color:#4338ca;stop-opacity:0.04" />
+    </radialGradient>
+
+    <radialGradient id="bgLayer2" cx="45%" cy="55%" r="60%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.12" />
+      <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:0.04" />
+    </radialGradient>
+
+    <radialGradient id="bgLayer3" cx="60%" cy="30%" r="45%">
+      <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:0.08" />
+      <stop offset="100%" style="stop-color:#6d28d9;stop-opacity:0.025" />
+    </radialGradient>
+
+    <radialGradient id="bgLayer4" cx="20%" cy="80%" r="40%">
+      <stop offset="0%" style="stop-color:#5b7cfa;stop-opacity:0.10" />
+      <stop offset="100%" style="stop-color:#3b5bdb;stop-opacity:0.035" />
+    </radialGradient>
+
+    <radialGradient id="bgLayer5" cx="85%" cy="20%" r="35%">
+      <stop offset="0%" style="stop-color:#5b21b6;stop-opacity:0.08" />
+      <stop offset="100%" style="stop-color:#312e81;stop-opacity:0.02" />
+    </radialGradient>
+
+    <radialGradient id="bgLayer6" cx="10%" cy="25%" r="30%">
+      <stop offset="0%" style="stop-color:#1e40af;stop-opacity:0.09" />
+      <stop offset="100%" style="stop-color:#0e2a7a;stop-opacity:0.02" />
+    </radialGradient>
+
+    <radialGradient id="vignette" cx="50%" cy="50%" r="75%">
+      <stop offset="60%" style="stop-color:#000000;stop-opacity:0" />
+      <stop offset="100%" style="stop-color:#000000;stop-opacity:0.25" />
+    </radialGradient>
+
+    <filter
+      id="paperGrain"
+      x="-50%"
+      y="-50%"
+      width="200%"
+      height="200%"
+      color-interpolation-filters="sRGB"
+    >
+      <feTurbulence
+        type="fractalNoise"
+        baseFrequency="0.8"
+        numOctaves="2"
+        seed="7"
+        stitchTiles="stitch"
+        result="noise"
+      />
+      <feColorMatrix in="noise" type="saturate" values="0" result="mono" />
+      <feComponentTransfer in="mono" result="faded">
+        <feFuncA type="table" tableValues="0 0.04" />
+      </feComponentTransfer>
+      <feBlend in="SourceGraphic" in2="faded" mode="soft-light" />
+    </filter>
+
+    <filter
+      id="softGlow"
+      x="-50%"
+      y="-50%"
+      width="200%"
+      height="200%"
+      color-interpolation-filters="sRGB"
+    >
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur" />
+      <feFlood flood-color="#7c3aed" flood-opacity="0.35" result="flood" />
+      <feComposite in2="blur" operator="in" />
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <filter
+      id="nodeShadow"
+      x="-50%"
+      y="-50%"
+      width="200%"
+      height="200%"
+      color-interpolation-filters="sRGB"
+    >
+      <feDropShadow
+        dx="0"
+        dy="1"
+        stdDeviation="1.2"
+        flood-color="#000000"
+        flood-opacity="0.35"
+      />
+    </filter>
+
+    <linearGradient
+      id="activeBorderGradient"
+      x1="0%"
+      y1="0%"
+      x2="100%"
+      y2="100%"
+    >
+      <stop offset="0%" style="stop-color:#5ea8ff;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
+    </linearGradient>
+
+    <linearGradient
+      id="activeConnectionGradient"
+      x1="0%"
+      y1="0%"
+      x2="100%"
+      y2="0%"
+    >
+      <stop offset="0%" style="stop-color:#6b7bff;stop-opacity:0.85" />
+      <stop offset="50%" style="stop-color:#7c3aed;stop-opacity:0.80" />
+      <stop offset="100%" style="stop-color:#6d28d9;stop-opacity:0.78" />
+    </linearGradient>
+
+    <linearGradient
+      id="inactiveConnectionGradient"
+      x1="0%"
+      y1="0%"
+      x2="100%"
+      y2="0%"
+    >
+      <stop offset="0%" style="stop-color:#94a3b8;stop-opacity:0.28" />
+      <stop offset="100%" style="stop-color:#475569;stop-opacity:0.16" />
+    </linearGradient>
+
+    <linearGradient id="titleGradientSober" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#e5e7eb;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#cbd5e1;stop-opacity:1" />
+    </linearGradient>
+
+    <radialGradient id="nodeActiveFill" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" style="stop-color:#6aa2ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3f51b6;stop-opacity:1" />
+    </radialGradient>
+
+    <radialGradient id="nodeInactiveFill" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" style="stop-color:#2d3357;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a203a;stop-opacity:1" />
+    </radialGradient>
+
+    <linearGradient id="decorLine" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#64748b;stop-opacity:0.16" />
+      <stop offset="100%" style="stop-color:#334155;stop-opacity:0.10" />
+    </linearGradient>
+  </defs>
+
+  <rect
+    width="1200"
+    height="630"
+    fill="url(#bgGradient)"
+    filter="url(#paperGrain)"
+  />
+
+  <ellipse
+    cx="320"
+    cy="210"
+    rx="260"
+    ry="190"
+    fill="url(#bgLayer1)"
+    transform="rotate(-18 320 210)"
+  />
+  <ellipse
+    cx="890"
+    cy="460"
+    rx="310"
+    ry="210"
+    fill="url(#bgLayer2)"
+    transform="rotate(12 890 460)"
+  />
+  <ellipse
+    cx="610"
+    cy="110"
+    rx="210"
+    ry="160"
+    fill="url(#bgLayer3)"
+    transform="rotate(9 610 110)"
+  />
+  <ellipse
+    cx="110"
+    cy="510"
+    rx="190"
+    ry="130"
+    fill="url(#bgLayer4)"
+    transform="rotate(-12 110 510)"
+  />
+  <ellipse
+    cx="1040"
+    cy="120"
+    rx="180"
+    ry="130"
+    fill="url(#bgLayer5)"
+    transform="rotate(8 1040 120)"
+  />
+  <ellipse
+    cx="140"
+    cy="160"
+    rx="160"
+    ry="110"
+    fill="url(#bgLayer6)"
+    transform="rotate(-10 140 160)"
+  />
+
+  <path
+    d="M0,390 Q220,300 440,340 T880,320 T1200,360 L1200,630 L0,630 Z"
+    fill="#4f46e5"
+    opacity="0.035"
+  />
+  <path
+    d="M0,505 Q330,455 660,485 T1200,470 L1200,630 L0,630 Z"
+    fill="#3b82f6"
+    opacity="0.03"
+  />
+  <path
+    d="M0,295 Q200,250 400,275 T800,260 T1200,255 L1200,630 L0,630 Z"
+    fill="#7c3aed"
+    opacity="0.025"
+  />
+  <path
+    d="M0,560 Q420,520 840,545 T1200,520 L1200,630 L0,630 Z"
+    fill="#5b7cfa"
+    opacity="0.025"
+  />
+
+  <g opacity="0.25">
+    <line
+      x1="0"
+      y1="190"
+      x2="1200"
+      y2="190"
+      stroke="url(#decorLine)"
+      stroke-width="0.6"
+    />
+    <line
+      x1="0"
+      y1="410"
+      x2="1200"
+      y2="410"
+      stroke="url(#decorLine)"
+      stroke-width="0.6"
+    />
+    <line
+      x1="300"
+      y1="0"
+      x2="300"
+      y2="630"
+      stroke="url(#decorLine)"
+      stroke-width="0.6"
+    />
+    <line
+      x1="900"
+      y1="0"
+      x2="900"
+      y2="630"
+      stroke="url(#decorLine)"
+      stroke-width="0.6"
+    />
+  </g>
+
+  <g opacity="0.12" fill="none" stroke="url(#decorLine)">
+    <path
+      d="M80,80 C200,120 260,60 380,100 S580,160 700,120 S940,80 1120,140"
+      stroke-width="0.6"
+    />
+    <path
+      d="M60,580 C240,520 420,620 600,560 S960,520 1140,600"
+      stroke-width="0.6"
+    />
+  </g>
+
+  <g opacity="0.18">
+    <circle cx="60" cy="110" r="4" fill="#5b7cfa" />
+    <circle cx="155" cy="555" r="3.5" fill="#6366f1" />
+    <circle cx="1085" cy="155" r="4.5" fill="#7c3aed" />
+    <circle cx="950" cy="505" r="3" fill="#3b82f6" />
+    <circle cx="505" cy="205" r="4" fill="#4f46e5" />
+    <circle cx="705" cy="582" r="3.5" fill="#5b7cfa" />
+  </g>
+
+  <rect width="1200" height="630" fill="url(#vignette)" />
+
+  <text
+    x="600"
+    y="120"
+    font-family="Arial, Helvetica, sans-serif"
+    font-size="60"
+    font-weight="700"
+    text-anchor="middle"
+    fill="url(#titleGradientSober)"
+  >
+    Redes Neurais
+  </text>
+
+  <g id="inputLayer" filter="url(#nodeShadow)">
+    <circle
+      cx="150"
+      cy="250"
+      r="18"
+      fill="url(#nodeActiveFill)"
+      stroke="url(#activeBorderGradient)"
+      stroke-width="2"
+      filter="url(#softGlow)"
+    />
+    <circle
+      cx="150"
+      cy="310"
+      r="18"
+      fill="url(#nodeActiveFill)"
+      stroke="url(#activeBorderGradient)"
+      stroke-width="2"
+      filter="url(#softGlow)"
+    />
+    <circle
+      cx="150"
+      cy="370"
+      r="18"
+      fill="url(#nodeActiveFill)"
+      stroke="url(#activeBorderGradient)"
+      stroke-width="2"
+      filter="url(#softGlow)"
+    />
+    <circle
+      cx="150"
+      cy="430"
+      r="18"
+      fill="url(#nodeActiveFill)"
+      stroke="url(#activeBorderGradient)"
+      stroke-width="2"
+      filter="url(#softGlow)"
+    />
+  </g>
+
+  <g id="hiddenLayer1" filter="url(#nodeShadow)">
+    <circle
+      cx="400"
+      cy="230"
+      r="18"
+      fill="url(#nodeActiveFill)"
+      stroke="url(#activeBorderGradient)"
+      stroke-width="2"
+      filter="url(#softGlow)"
+    />
+    <circle
+      cx="400"
+      cy="290"
+      r="18"
+      fill="url(#nodeActiveFill)"
+      stroke="url(#activeBorderGradient)"
+      stroke-width="2"
+      filter="url(#softGlow)"
+    />
+    <circle
+      cx="400"
+      cy="350"
+      r="18"
+      fill="url(#nodeActiveFill)"
+      stroke="url(#activeBorderGradient)"
+      stroke-width="2"
+      filter="url(#softGlow)"
+    />
+    <circle
+      cx="400"
+      cy="410"
+      r="18"
+      fill="url(#nodeActiveFill)"
+      stroke="url(#activeBorderGradient)"
+      stroke-width="2"
+      filter="url(#softGlow)"
+    />
+    <circle
+      cx="400"
+      cy="470"
+      r="18"
+      fill="url(#nodeInactiveFill)"
+    />
+  </g>
+
+  <g id="hiddenLayer2" filter="url(#nodeShadow)">
+    <circle cx="650" cy="250" r="18" fill="url(#nodeInactiveFill)" />
+    <circle
+      cx="650"
+      cy="310"
+      r="18"
+      fill="url(#nodeActiveFill)"
+      stroke="url(#activeBorderGradient)"
+      stroke-width="2"
+      filter="url(#softGlow)"
+    />
+    <circle
+      cx="650"
+      cy="370"
+      r="18"
+      fill="url(#nodeActiveFill)"
+      stroke="url(#activeBorderGradient)"
+      stroke-width="2"
+      filter="url(#softGlow)"
+    />
+    <circle
+      cx="650"
+      cy="430"
+      r="18"
+      fill="url(#nodeActiveFill)"
+      stroke="url(#activeBorderGradient)"
+      stroke-width="2"
+      filter="url(#softGlow)"
+    />
+  </g>
+
+  <g id="hiddenLayer3" filter="url(#nodeShadow)">
+    <circle cx="900" cy="280" r="18" fill="url(#nodeInactiveFill)" />
+    <circle
+      cx="900"
+      cy="340"
+      r="18"
+      fill="url(#nodeActiveFill)"
+      stroke="url(#activeBorderGradient)"
+      stroke-width="2"
+      filter="url(#softGlow)"
+    />
+    <circle
+      cx="900"
+      cy="400"
+      r="18"
+      fill="url(#nodeActiveFill)"
+      stroke="url(#activeBorderGradient)"
+      stroke-width="2"
+      filter="url(#softGlow)"
+    />
+    <circle cx="900" cy="460" r="18" fill="url(#nodeInactiveFill)" />
+  </g>
+
+  <g id="outputLayer" filter="url(#nodeShadow)">
+    <circle
+      cx="1100"
+      cy="340"
+      r="18"
+      fill="url(#nodeActiveFill)"
+      stroke="url(#activeBorderGradient)"
+      stroke-width="2"
+      filter="url(#softGlow)"
+    />
+    <circle cx="1100" cy="400" r="18" fill="url(#nodeInactiveFill)" />
+  </g>
+
+  <g id="connections1">
+    <line
+      x1="168"
+      y1="250"
+      x2="382"
+      y2="290"
+      stroke="url(#activeConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="168"
+      y1="250"
+      x2="382"
+      y2="350"
+      stroke="url(#activeConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="168"
+      y1="310"
+      x2="382"
+      y2="290"
+      stroke="url(#activeConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="168"
+      y1="310"
+      x2="382"
+      y2="350"
+      stroke="url(#activeConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="168"
+      y1="310"
+      x2="382"
+      y2="410"
+      stroke="url(#activeConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="168"
+      y1="370"
+      x2="382"
+      y2="350"
+      stroke="url(#activeConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="168"
+      y1="370"
+      x2="382"
+      y2="410"
+      stroke="url(#activeConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="168"
+      y1="430"
+      x2="382"
+      y2="290"
+      stroke="url(#activeConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="168"
+      y1="430"
+      x2="382"
+      y2="410"
+      stroke="url(#activeConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="168"
+      y1="250"
+      x2="382"
+      y2="230"
+      stroke="url(#activeConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="168"
+      y1="310"
+      x2="382"
+      y2="230"
+      stroke="url(#activeConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="168"
+      y1="370"
+      x2="382"
+      y2="230"
+      stroke="url(#activeConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="168"
+      y1="430"
+      x2="382"
+      y2="230"
+      stroke="url(#activeConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="168"
+      y1="430"
+      x2="382"
+      y2="470"
+      stroke="url(#inactiveConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="168"
+      y1="370"
+      x2="382"
+      y2="470"
+      stroke="url(#inactiveConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="168"
+      y1="310"
+      x2="382"
+      y2="470"
+      stroke="url(#inactiveConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="168"
+      y1="250"
+      x2="382"
+      y2="470"
+      stroke="url(#inactiveConnectionGradient)"
+      stroke-width="2.2"
+    />
+  </g>
+
+  <g id="connections2">
+
+    <line
+      x1="418"
+      y1="290"
+      x2="632"
+      y2="370"
+      stroke="url(#activeConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="418"
+      y1="350"
+      x2="632"
+      y2="310"
+      stroke="url(#activeConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="418"
+      y1="410"
+      x2="632"
+      y2="310"
+      stroke="url(#activeConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="418"
+      y1="230"
+      x2="632"
+      y2="250"
+      stroke="url(#inactiveConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="418"
+      y1="230"
+      x2="632"
+      y2="310"
+      stroke="url(#activeConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="418"
+      y1="230"
+      x2="632"
+      y2="370"
+      stroke="url(#activeConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="418"
+      y1="230"
+      x2="632"
+      y2="430"
+      stroke="url(#activeConnectionGradient)"
+      stroke-width="2.2"
+    />
+
+    <line
+      x1="418"
+      y1="350"
+      x2="632"
+      y2="250"
+      stroke="url(#inactiveConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="418"
+      y1="410"
+      x2="632"
+      y2="250"
+      stroke="url(#inactiveConnectionGradient)"
+      stroke-width="2.2"
+    />
+
+    <line
+      x1="418"
+      y1="470"
+      x2="632"
+      y2="310"
+      stroke="url(#inactiveConnectionGradient)"
+      stroke-width="2.2"
+    />
+
+    <line
+      x1="418"
+      y1="470"
+      x2="632"
+      y2="430"
+      stroke="url(#inactiveConnectionGradient)"
+      stroke-width="2.2"
+    />
+  </g>
+
+  <g id="connections3">
+    <line
+      x1="668"
+      y1="250"
+      x2="882"
+      y2="280"
+      stroke="url(#inactiveConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="668"
+      y1="250"
+      x2="882"
+      y2="340"
+      stroke="url(#inactiveConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="668"
+      y1="250"
+      x2="882"
+      y2="460"
+      stroke="url(#inactiveConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="668"
+      y1="310"
+      x2="882"
+      y2="400"
+      stroke="url(#activeConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="668"
+      y1="370"
+      x2="882"
+      y2="340"
+      stroke="url(#activeConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="668"
+      y1="370"
+      x2="882"
+      y2="400"
+      stroke="url(#activeConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="668"
+      y1="310"
+      x2="882"
+      y2="460"
+      stroke="url(#inactiveConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="668"
+      y1="430"
+      x2="882"
+      y2="400"
+      stroke="url(#activeConnectionGradient)"
+      stroke-width="2.2"
+    />
+  </g>
+
+  <g id="connections4">
+    <line
+      x1="918"
+      y1="340"
+      x2="1082"
+      y2="340"
+      stroke="url(#activeConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="918"
+      y1="340"
+      x2="1082"
+      y2="400"
+      stroke="url(#inactiveConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="918"
+      y1="400"
+      x2="1082"
+      y2="340"
+      stroke="url(#activeConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="918"
+      y1="280"
+      x2="1082"
+      y2="340"
+      stroke="url(#inactiveConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="918"
+      y1="341"
+      x2="1082"
+      y2="340"
+      stroke="url(#activeConnectionGradient)"
+      stroke-width="2.2"
+    />
+    <line
+      x1="918"
+      y1="460"
+      x2="1082"
+      y2="400"
+      stroke="url(#inactiveConnectionGradient)"
+      stroke-width="2.2"
+    />
+  </g>
+
+  <text
+    x="600"
+    y="552"
+    font-family="Arial, Helvetica, sans-serif"
+    font-size="20"
+    text-anchor="middle"
+    fill="#94a3b8"
+  >
+    Multi-Layer Perceptron
+  </text>
+</svg>
